@@ -5,6 +5,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="MinVer" Version="5.0.0" PrivateAssets="All" />
     <PackageReference Include="Spectre.Cli" Version="0.49.0" />
   </ItemGroup>
 
@@ -19,7 +20,8 @@
     <PackageId>MkDevForge.Bbt</PackageId>
     <Description>Bitbucket Cloud pull request CLI for developers and AI agents.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <Version>0.1.0</Version>
+    <MinVerTagPrefix>v</MinVerTagPrefix>
+    <MinVerMinimumMajorMinor>0.1</MinVerMinimumMajorMinor>
   </PropertyGroup>
 
   <ItemGroup>
