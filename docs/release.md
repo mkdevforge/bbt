@@ -18,7 +18,8 @@
 1. On nuget.org, open the `MkDevForge.Bbt` package settings.
 2. Configure Trusted Publishing for this GitHub repository and the workflow file `.github/workflows/release.yml`.
 3. Ensure the workflow keeps `permissions.id-token: write` (required for OIDC exchange).
-4. Push a release tag to trigger publish.
+4. Add GitHub repository secret `NUGET_USER` with your nuget.org username (used by `NuGet/login@v1`).
+5. Push a release tag to trigger publish.
 
 ## Release commands
 
