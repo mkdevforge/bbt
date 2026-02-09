@@ -1,0 +1,35 @@
+using System.Text.Json.Nodes;
+using Bbt.Core.Json;
+using Xunit;
+
+namespace Bbt.Core.Tests.Json;
+
+public sealed class JsonFieldSelectorTests
+{
+    [Fact]
+    public void Apply_SelectsFieldsFromObject()
+    {
+        var node = JsonNode.Parse("""{"id":1,"title":"x","state":"OPEN"}""")!;
+        var result = JsonFieldSelector.Apply(node, ["id", "state"]);
+
+        Assert.Equal("""{"id":1,"state":"OPEN"}""", result.ToJsonString());
+    }
+
+    [Fact]
+    public void Apply_SelectsFieldsFromArray()
+    {
+        var node = JsonNode.Parse("""[{"id":1,"title":"a"},{"id":2,"title":"b"}]""")!;
+        var result = JsonFieldSelector.Apply(node, ["id"]);
+
+        Assert.Equal("""[{"id":1},{"id":2}]""", result.ToJsonString());
+    }
+
+    [Fact]
+    public void Apply_ThrowsOnUnknownField()
+    {
+        var node = JsonNode.Parse("""{"id":1,"title":"x"}""")!;
+        var ex = Assert.Throws<InvalidOperationException>(() => JsonFieldSelector.Apply(node, ["missing"]));
+        Assert.Contains("Unknown field", ex.Message);
+    }
+}
+
