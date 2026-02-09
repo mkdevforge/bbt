@@ -1,0 +1,13 @@
+bin/
+obj/
+TestResults/
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.nupkg
+*.snupkg
+*.log
+.DS_Store
+nupkg/
