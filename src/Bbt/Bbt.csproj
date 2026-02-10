@@ -18,7 +18,12 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>bbt</ToolCommandName>
     <PackageId>MkDevForge.Bbt</PackageId>
+    <Authors>mkdevforge</Authors>
     <Description>Bitbucket Cloud pull request CLI for developers and AI agents.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/mkdevforge/bbt</RepositoryUrl>
+    <PackageTags>bitbucket;cli;dotnet-tool;pull-request</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <MinVerTagPrefix>v</MinVerTagPrefix>
     <MinVerMinimumMajorMinor>0.1</MinVerMinimumMajorMinor>
