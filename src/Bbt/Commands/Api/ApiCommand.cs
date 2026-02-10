@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
@@ -18,15 +19,19 @@ public sealed class ApiCommand : BbtAsyncCommand<ApiCommand.Settings>
 {
     public sealed class Settings : BbtSettings
     {
+        [Description("HTTP method (GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS).")]
         [CommandArgument(0, "<METHOD>")]
         public string Method { get; init; } = string.Empty;
 
+        [Description("Bitbucket API path or absolute URL. Supports {workspace}/{repo} placeholders.")]
         [CommandArgument(1, "<PATH>")]
         public string Path { get; init; } = string.Empty;
 
+        [Description("JSON request body file for POST/PUT/PATCH.")]
         [CommandOption("--input <FILE>")]
         public string? InputFile { get; init; }
 
+        [Description("Follow paginated responses and emit merged values array.")]
         [CommandOption("--paginate")]
         public bool Paginate { get; init; }
     }

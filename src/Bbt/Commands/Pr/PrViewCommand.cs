@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Bbt.Core.Auth;
 using Bbt.Core.Bitbucket;
 using Bbt.Core.Config;
@@ -14,6 +15,7 @@ public sealed class PrViewCommand : BbtAsyncCommand<PrViewCommand.Settings>
 {
     public sealed class Settings : BbtSettings
     {
+        [Description("Pull request id (optional; inferred from current branch if omitted).")]
         [CommandArgument(0, "[ID]")]
         public int? Id { get; init; }
     }

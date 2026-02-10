@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Bbt.Core.Config;
 using Bbt.Core.IO;
 using Bbt.Infrastructure;
@@ -10,6 +11,7 @@ public sealed class AuthSwitchCommand : BbtAsyncCommand<AuthSwitchCommand.Settin
 {
     public sealed class Settings : BbtSettings
     {
+        [Description("Profile to make current.")]
         [CommandArgument(0, "<PROFILE>")]
         public string Profile { get; init; } = string.Empty;
     }

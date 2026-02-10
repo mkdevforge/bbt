@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Bbt.Core.Auth;
 using Bbt.Core.Config;
 using Bbt.Core.IO;
@@ -11,6 +12,7 @@ public sealed class AuthLogoutCommand : BbtAsyncCommand<AuthLogoutCommand.Settin
 {
     public sealed class Settings : BbtSettings
     {
+        [Description("Profile to log out (defaults to current profile).")]
         [CommandOption("--profile <PROFILE>")]
         public string? Profile { get; init; }
     }

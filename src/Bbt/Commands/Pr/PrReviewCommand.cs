@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Bbt.Core.Auth;
 using Bbt.Core.Bitbucket;
 using Bbt.Core.Bitbucket.Models;
@@ -16,24 +17,31 @@ public sealed class PrReviewCommand : BbtAsyncCommand<PrReviewCommand.Settings>
 {
     public sealed class Settings : BbtSettings
     {
+        [Description("Target pull request id.")]
         [CommandArgument(0, "<ID>")]
         public int Id { get; init; }
 
+        [Description("Approve the pull request.")]
         [CommandOption("--approve")]
         public bool Approve { get; init; }
 
+        [Description("Remove your approval.")]
         [CommandOption("--unapprove")]
         public bool Unapprove { get; init; }
 
+        [Description("Request changes on the pull request.")]
         [CommandOption("--request-changes")]
         public bool RequestChanges { get; init; }
 
+        [Description("Remove your request for changes.")]
         [CommandOption("--unrequest-changes")]
         public bool UnrequestChanges { get; init; }
 
+        [Description("Optional global review comment body.")]
         [CommandOption("--body <TEXT>")]
         public string? Body { get; init; }
 
+        [Description("Read optional global review comment body from file.")]
         [CommandOption("--body-file <PATH>")]
         public string? BodyFile { get; init; }
 
