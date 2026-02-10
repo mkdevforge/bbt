@@ -13,7 +13,7 @@ namespace Bbt.Commands.Pr;
 
 public sealed class PrDiffCommand : BbtAsyncCommand<PrDiffCommand.Settings>
 {
-    public sealed class Settings : BbtSettings
+    public sealed class Settings : BbtRepoSettings
     {
         [Description("Pull request id (optional; inferred from current branch if omitted).")]
         [CommandArgument(0, "[ID]")]

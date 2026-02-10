@@ -17,15 +17,15 @@ namespace Bbt.Commands.Api;
 
 public sealed class ApiCommand : BbtAsyncCommand<ApiCommand.Settings>
 {
-    public sealed class Settings : BbtSettings
+    public sealed class Settings : BbtRepoSettings
     {
-        [Description("HTTP method (GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS).")]
-        [CommandArgument(0, "<METHOD>")]
-        public string Method { get; init; } = string.Empty;
-
         [Description("Bitbucket API path or absolute URL. Supports {workspace}/{repo} placeholders.")]
         [CommandArgument(1, "<PATH>")]
         public string Path { get; init; } = string.Empty;
+
+        [Description("HTTP method (GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS).")]
+        [CommandArgument(0, "<METHOD>")]
+        public string Method { get; init; } = string.Empty;
 
         [Description("JSON request body file for POST/PUT/PATCH.")]
         [CommandOption("--input <FILE>")]
@@ -41,10 +41,11 @@ public sealed class ApiCommand : BbtAsyncCommand<ApiCommand.Settings>
         var processRunner = new ProcessRunner();
         var credentialStore = CredentialStoreFactory.CreateDefault(processRunner);
         var configStore = new BbtConfigStore();
+        var (methodArg, pathArg) = NormalizeMethodAndPath(settings.Method, settings.Path);
 
         var auth = await AuthContextResolver.ResolveAsync(configStore, credentialStore, profileOverride: null, requireToken: true);
 
-        var resolvedPath = await ReplacePlaceholdersAsync(settings.Path, settings, configStore, processRunner);
+        var resolvedPath = await ReplacePlaceholdersAsync(pathArg, settings, configStore, processRunner);
         var uri = ResolveUri(auth.BaseUri, resolvedPath);
 
         var authHeaderValue = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{auth.Email}:{auth.Token}"));
@@ -57,7 +58,7 @@ public sealed class ApiCommand : BbtAsyncCommand<ApiCommand.Settings>
         http.DefaultRequestHeaders.UserAgent.ParseAdd($"bbt/{typeof(ApiCommand).Assembly.GetName().Version}");
         http.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-        var method = ParseMethod(settings.Method);
+        var method = ParseMethod(methodArg);
         string? inputContent = null;
         if (!string.IsNullOrWhiteSpace(settings.InputFile))
         {
@@ -131,6 +132,21 @@ public sealed class ApiCommand : BbtAsyncCommand<ApiCommand.Settings>
                 Console.Out.WriteLine(body);
                 return 0;
         }
+    }
+
+    private static (string Method, string Path) NormalizeMethodAndPath(string first, string second)
+    {
+        if (TryParseMethod(first, out _))
+        {
+            return (first, second);
+        }
+
+        if (TryParseMethod(second, out _))
+        {
+            return (second, first);
+        }
+
+        return (first, second);
     }
 
     private static async Task<string> ReplacePlaceholdersAsync(string path, Settings settings, BbtConfigStore configStore, ProcessRunner processRunner)
@@ -237,7 +253,17 @@ public sealed class ApiCommand : BbtAsyncCommand<ApiCommand.Settings>
             throw new InvalidOperationException("METHOD is required.");
         }
 
-        return method.ToUpperInvariant() switch
+        if (!TryParseMethod(method, out var parsed))
+        {
+            throw new InvalidOperationException($"Unsupported method '{method}'.");
+        }
+
+        return parsed;
+    }
+
+    private static bool TryParseMethod(string method, out HttpMethod parsed)
+    {
+        parsed = method.ToUpperInvariant() switch
         {
             "GET" => HttpMethod.Get,
             "POST" => HttpMethod.Post,
@@ -246,8 +272,10 @@ public sealed class ApiCommand : BbtAsyncCommand<ApiCommand.Settings>
             "DELETE" => HttpMethod.Delete,
             "HEAD" => HttpMethod.Head,
             "OPTIONS" => HttpMethod.Options,
-            _ => throw new InvalidOperationException($"Unsupported method '{method}'.")
+            _ => null!
         };
+
+        return parsed is not null;
     }
 
     private static async Task<JsonArray> FetchAllValuesAsync(

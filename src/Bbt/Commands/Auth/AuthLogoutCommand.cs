@@ -10,7 +10,7 @@ namespace Bbt.Commands.Auth;
 
 public sealed class AuthLogoutCommand : BbtAsyncCommand<AuthLogoutCommand.Settings>
 {
-    public sealed class Settings : BbtSettings
+    public sealed class Settings : BbtOutputSettings
     {
         [Description("Profile to log out (defaults to current profile).")]
         [CommandOption("--profile <PROFILE>")]

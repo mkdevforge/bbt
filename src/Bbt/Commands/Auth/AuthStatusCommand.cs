@@ -13,7 +13,7 @@ namespace Bbt.Commands.Auth;
 
 public sealed class AuthStatusCommand : BbtAsyncCommand<AuthStatusCommand.Settings>
 {
-    public sealed class Settings : BbtSettings
+    public sealed class Settings : BbtNetworkSettings
     {
         [Description("Call Bitbucket API to verify current credentials.")]
         [CommandOption("--check")]

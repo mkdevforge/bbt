@@ -14,17 +14,21 @@ namespace Bbt.Commands.Auth;
 
 public sealed class AuthLoginCommand : BbtAsyncCommand<AuthLoginCommand.Settings>
 {
-    public sealed class Settings : BbtSettings
+    public sealed class Settings : BbtNetworkSettings
     {
-        [Description("Profile name to store/update (defaults to workspace or 'default').")]
+        [Description("Optional workspace slug to validate and store as the profile default.")]
+        [CommandOption("--workspace <WORKSPACE>")]
+        public string? Workspace { get; init; }
+
+        [Description("Profile name to store/update (defaults to --workspace, BBT_WORKSPACE, or 'default').")]
         [CommandOption("--profile <PROFILE>")]
         public string? Profile { get; init; }
 
-        [Description("Atlassian account email for API authentication.")]
+        [Description("Atlassian account email for API authentication (prompted if omitted).")]
         [CommandOption("--email <EMAIL>")]
         public string? Email { get; init; }
 
-        [Description("Bitbucket API token (prompted if omitted).")]
+        [Description("Bitbucket API token (prompted if omitted). Minimum required scopes: " + BitbucketTokenScopes.MinimumScopesHelp + ".")]
         [CommandOption("--token <TOKEN>")]
         public string? Token { get; init; }
     }
@@ -43,6 +47,11 @@ public sealed class AuthLoginCommand : BbtAsyncCommand<AuthLoginCommand.Settings
         var email = settings.Email ?? BbtEnvironment.GetNonEmptyOrNull("BBT_EMAIL");
         if (string.IsNullOrWhiteSpace(email))
         {
+            if (Console.IsInputRedirected)
+            {
+                throw new InvalidOperationException("Missing email in non-interactive mode. Provide --email or BBT_EMAIL.");
+            }
+
             email = Spectre.Console.AnsiConsole.Prompt(new TextPrompt<string>("Atlassian email:").Validate(s =>
                 string.IsNullOrWhiteSpace(s) ? Spectre.Console.ValidationResult.Error("Email is required.") : Spectre.Console.ValidationResult.Success()));
         }
@@ -50,6 +59,17 @@ public sealed class AuthLoginCommand : BbtAsyncCommand<AuthLoginCommand.Settings
         var token = settings.Token ?? BbtEnvironment.GetNonEmptyOrNull("BBT_TOKEN");
         if (string.IsNullOrWhiteSpace(token))
         {
+            if (Console.IsInputRedirected)
+            {
+                throw new InvalidOperationException($"Missing token in non-interactive mode. Provide --token or BBT_TOKEN. Required scopes: {BitbucketTokenScopes.MinimumCsv}");
+            }
+
+            Spectre.Console.AnsiConsole.MarkupLine("Minimum required token scopes:");
+            foreach (var scope in BitbucketTokenScopes.Minimum)
+            {
+                Spectre.Console.AnsiConsole.MarkupLine($"- [grey]{Markup.Escape(scope)}[/]");
+            }
+
             token = Spectre.Console.AnsiConsole.Prompt(new TextPrompt<string>("Bitbucket API token:").Secret().Validate(s =>
                 string.IsNullOrWhiteSpace(s) ? Spectre.Console.ValidationResult.Error("Token is required.") : Spectre.Console.ValidationResult.Success()));
         }

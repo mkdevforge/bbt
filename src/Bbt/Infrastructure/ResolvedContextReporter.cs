@@ -4,7 +4,7 @@ namespace Bbt.Infrastructure;
 
 public static class ResolvedContextReporter
 {
-    public static void LogRepoContext(BbtSettings settings, ResolvedRepoContext context)
+    public static void LogRepoContext(BbtNetworkSettings settings, ResolvedRepoContext context)
     {
         if (!settings.Verbose)
         {
@@ -15,7 +15,7 @@ public static class ResolvedContextReporter
         Console.Error.WriteLine($"Context: workspace={context.Workspace} repo={context.Repo} source={source}");
     }
 
-    public static void LogWorkspaceContext(BbtSettings settings, string workspace, string source)
+    public static void LogWorkspaceContext(BbtNetworkSettings settings, string workspace, string source)
     {
         if (!settings.Verbose)
         {

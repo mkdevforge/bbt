@@ -16,6 +16,19 @@ Verify:
 bbt --version
 ```
 
+First run after install:
+
+```bash
+bbt auth login
+```
+
+`bbt auth login` is interactive by default (prompts for email and token).  
+For non-interactive use, pass credentials explicitly:
+
+```bash
+bbt auth login --email <atlassian-email> --token <api-token>
+```
+
 ## Requirements
 
 - Bitbucket Cloud account
@@ -23,43 +36,53 @@ bbt --version
 - Atlassian email address for HTTP Basic auth (`email:token`)
 - Optional: `jq` if you want to use `--jq`
 
+Minimum token scopes required by `bbt`:
+
+- `read:repository:bitbucket`
+- `read:workspace:bitbucket`
+- `read:user:bitbucket`
+- `read:pullrequest:bitbucket`
+- `write:pullrequest:bitbucket`
+
 ## Quick start
 
-1. Login and create/update a profile:
+1. From your Bitbucket repo folder, login:
 
 ```bash
-bbt auth login --workspace <workspace>
+bbt auth login
 ```
 
-2. List open pull requests:
+2. List open pull requests (workspace/repo inferred from git `origin`):
 
 ```bash
-bbt pr list --workspace <workspace> --repo <repo>
+bbt pr list
 ```
 
-3. View a PR:
+3. View the PR for your current branch (or pass an explicit id):
 
 ```bash
-bbt pr view <id> --workspace <workspace> --repo <repo>
+bbt pr view
 ```
 
 4. Get structured diff JSON:
 
 ```bash
-bbt pr diff <id> --workspace <workspace> --repo <repo> --json
+bbt pr diff <id> --json
 ```
 
 ## Commands
 
 ### Auth
 
-- `bbt auth login [--workspace <slug>] [--profile <name>] [--email <email>] [--token <token>]`
+- `bbt auth login [--email <email>] [--token <token>] [--workspace <slug>] [--profile <name>]`
 - `bbt auth switch <profile>`
 - `bbt auth status [--check]`
 - `bbt auth logout [--profile <name>]`
 
-`auth login` validates credentials with Bitbucket before saving.  
+`auth login` validates credentials with Bitbucket before saving. If `--workspace` is provided, it also validates access and stores it as the profile default workspace.  
 `auth status --check` performs a live API check.
+
+If `--email`/`--token` are omitted, `auth login` prompts interactively (unless stdin is redirected). When prompting for a token, it prints the minimum required scopes above.
 
 ### Pull requests
 
@@ -74,14 +97,17 @@ Notes:
 
 - For `pr view`, `pr diff`, and `pr comments`, `<id>` is optional.
 - If `<id>` is omitted, `bbt` tries to resolve the PR from your current git branch.
+- `pr list` defaults to `--state OPEN`.
 - `pr comment` and `pr review` always require explicit PR id.
+- Inline comments default to `--side to` (new side).
 - `pr review --body/--body-file` posts a global comment first, then performs the review action.
 
 ### Raw API access
 
-- `bbt api <METHOD> <PATH> [--input <file>] [--paginate]`
+- `bbt api <PATH> <METHOD> [--input <file>] [--paginate]`
 
 `--paginate` follows Bitbucket `next` links and emits a merged `values` array.
+`bbt api <METHOD> <PATH> ...` is also accepted.
 
 Path placeholders:
 
@@ -91,8 +117,15 @@ Path placeholders:
 Example:
 
 ```bash
-bbt api GET "/repositories/{workspace}/{repo}/pullrequests?state=OPEN&pagelen=10" --paginate --json
+bbt api "/repositories/{workspace}/{repo}/pullrequests?state=OPEN&pagelen=10" GET --paginate --json
 ```
+
+### LLM context
+
+- `bbt llms`
+- `bbt llms --json`
+
+Use this to print a single, complete CLI capability reference for AI/automation tooling.
 
 ## Output and scripting flags
 
@@ -146,11 +179,6 @@ Environment values override profile values.
 - Bitbucket Cloud only
 - API token auth only (no OAuth flow yet)
 - No dedicated `pr comment edit` command yet (you can use `bbt api PUT .../comments/{id}`)
-
-## Documentation
-
-- API contract used by v0.1: `docs/contracts/bitbucket-cloud-v0.1.md`
-- Release and semantic versioning: `docs/release.md`
 
 ## License
 

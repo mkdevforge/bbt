@@ -9,7 +9,7 @@ namespace Bbt.Commands.Auth;
 
 public sealed class AuthSwitchCommand : BbtAsyncCommand<AuthSwitchCommand.Settings>
 {
-    public sealed class Settings : BbtSettings
+    public sealed class Settings : BbtOutputSettings
     {
         [Description("Profile to make current.")]
         [CommandArgument(0, "<PROFILE>")]
