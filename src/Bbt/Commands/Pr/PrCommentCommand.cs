@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Bbt.Core.Auth;
 using Bbt.Core.Bitbucket;
 using Bbt.Core.Bitbucket.Models;
@@ -15,24 +16,31 @@ public sealed class PrCommentCommand : BbtAsyncCommand<PrCommentCommand.Settings
 {
     public sealed class Settings : BbtSettings
     {
+        [Description("Target pull request id.")]
         [CommandArgument(0, "<ID>")]
         public int Id { get; init; }
 
+        [Description("Comment body text.")]
         [CommandOption("--body <TEXT>")]
         public string? Body { get; init; }
 
+        [Description("Read comment body from file path.")]
         [CommandOption("--body-file <PATH>")]
         public string? BodyFile { get; init; }
 
+        [Description("Inline file path; requires --line.")]
         [CommandOption("--file <PATH>")]
         public string? File { get; init; }
 
+        [Description("Inline line number (1-based).")]
         [CommandOption("--line <N>")]
         public int? Line { get; init; }
 
+        [Description("Optional inline range end line (1-based).")]
         [CommandOption("--line-end <N>")]
         public int? LineEnd { get; init; }
 
+        [Description("Inline side: 'to' (new) or 'from' (old).")]
         [CommandOption("--side <SIDE>")]
         public string Side { get; init; } = "to";
 

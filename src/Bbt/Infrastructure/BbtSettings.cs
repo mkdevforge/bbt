@@ -1,30 +1,39 @@
+using System.ComponentModel;
 using Spectre.Cli;
 
 namespace Bbt.Infrastructure;
 
 public abstract class BbtSettings : CommandSettings
 {
+    [Description("Override workspace slug for this command.")]
     [CommandOption("--workspace <WORKSPACE>")]
     public string? Workspace { get; init; }
 
+    [Description("Override repository slug for this command.")]
     [CommandOption("--repo <REPO>")]
     public string? Repo { get; init; }
 
+    [Description("Output JSON only.")]
     [CommandOption("--json")]
     public bool Json { get; init; }
 
+    [Description("Comma-separated top-level JSON fields (requires --json).")]
     [CommandOption("--fields <FIELDS>")]
     public string? Fields { get; init; }
 
+    [Description("Run jq expression on JSON output (requires --json and jq).")]
     [CommandOption("--jq <EXPR>")]
     public string? Jq { get; init; }
 
+    [Description("Minimal output for scripting.")]
     [CommandOption("--quiet")]
     public bool Quiet { get; init; }
 
+    [Description("Print request/response diagnostics to stderr.")]
     [CommandOption("--verbose")]
     public bool Verbose { get; init; }
 
+    [Description("Disable transient retry/backoff.")]
     [CommandOption("--no-retry")]
     public bool NoRetry { get; init; }
 
@@ -63,4 +72,3 @@ public abstract class BbtSettings : CommandSettings
         return ValidationResult.Success();
     }
 }
-

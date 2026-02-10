@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Bbt.Core.Auth;
 using Bbt.Core.Bitbucket;
 using Bbt.Core.Bitbucket.Models;
@@ -15,12 +16,15 @@ public sealed class AuthLoginCommand : BbtAsyncCommand<AuthLoginCommand.Settings
 {
     public sealed class Settings : BbtSettings
     {
+        [Description("Profile name to store/update (defaults to workspace or 'default').")]
         [CommandOption("--profile <PROFILE>")]
         public string? Profile { get; init; }
 
+        [Description("Atlassian account email for API authentication.")]
         [CommandOption("--email <EMAIL>")]
         public string? Email { get; init; }
 
+        [Description("Bitbucket API token (prompted if omitted).")]
         [CommandOption("--token <TOKEN>")]
         public string? Token { get; init; }
     }

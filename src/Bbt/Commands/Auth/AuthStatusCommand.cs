@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Bbt.Core.Auth;
 using Bbt.Core.Bitbucket.Models;
 using Bbt.Core.Config;
@@ -14,6 +15,7 @@ public sealed class AuthStatusCommand : BbtAsyncCommand<AuthStatusCommand.Settin
 {
     public sealed class Settings : BbtSettings
     {
+        [Description("Call Bitbucket API to verify current credentials.")]
         [CommandOption("--check")]
         public bool Check { get; init; }
     }

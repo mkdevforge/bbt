@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Bbt.Core.Auth;
 using Bbt.Core.Bitbucket;
 using Bbt.Core.Config;
@@ -14,9 +15,11 @@ public sealed class PrListCommand : BbtAsyncCommand<PrListCommand.Settings>
 {
     public sealed class Settings : BbtSettings
     {
+        [Description("PR state filter (OPEN, MERGED, DECLINED, SUPERSEDED).")]
         [CommandOption("--state <STATE>")]
         public string State { get; init; } = "OPEN";
 
+        [Description("Maximum number of pull requests to return.")]
         [CommandOption("--limit <N>")]
         public int? Limit { get; init; }
     }
