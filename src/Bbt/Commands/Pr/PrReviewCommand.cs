@@ -15,7 +15,7 @@ namespace Bbt.Commands.Pr;
 
 public sealed class PrReviewCommand : BbtAsyncCommand<PrReviewCommand.Settings>
 {
-    public sealed class Settings : BbtSettings
+    public sealed class Settings : BbtRepoSettings
     {
         [Description("Target pull request id.")]
         [CommandArgument(0, "<ID>")]
@@ -37,11 +37,11 @@ public sealed class PrReviewCommand : BbtAsyncCommand<PrReviewCommand.Settings>
         [CommandOption("--unrequest-changes")]
         public bool UnrequestChanges { get; init; }
 
-        [Description("Optional global review comment body.")]
+        [Description("Optional global review comment body (posted before review action).")]
         [CommandOption("--body <TEXT>")]
         public string? Body { get; init; }
 
-        [Description("Read optional global review comment body from file.")]
+        [Description("Read optional global review comment body from file (posted before review action).")]
         [CommandOption("--body-file <PATH>")]
         public string? BodyFile { get; init; }
 

@@ -1,10 +1,11 @@
 using Bbt.Core.Bitbucket;
+using System.Net;
 using Spectre.Cli;
 
 namespace Bbt.Infrastructure;
 
 public abstract class BbtAsyncCommand<TSettings> : AsyncCommand<TSettings>
-    where TSettings : BbtSettings
+    where TSettings : BbtOutputSettings
 {
     public sealed override async Task<int> ExecuteAsync(CommandContext context, TSettings settings)
     {
@@ -15,7 +16,10 @@ public abstract class BbtAsyncCommand<TSettings> : AsyncCommand<TSettings>
         catch (BitbucketApiException ex)
         {
             var detail = string.IsNullOrWhiteSpace(ex.ApiDetail) ? string.Empty : $"\n{ex.ApiDetail}";
-            Console.Error.WriteLine($"{(int)ex.StatusCode} {ex.StatusCode}: {ex.ApiMessage ?? ex.Message}{detail}");
+            var authHint = ex.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden
+                ? $"\nHint: verify credentials and token scopes: {BitbucketTokenScopes.MinimumCsv}"
+                : string.Empty;
+            Console.Error.WriteLine($"{(int)ex.StatusCode} {ex.StatusCode}: {ex.ApiMessage ?? ex.Message}{detail}{authHint}");
             return 1;
         }
         catch (InvalidOperationException ex)
@@ -32,4 +36,3 @@ public abstract class BbtAsyncCommand<TSettings> : AsyncCommand<TSettings>
 
     protected abstract Task<int> ExecuteCommandAsync(CommandContext context, TSettings settings);
 }
-

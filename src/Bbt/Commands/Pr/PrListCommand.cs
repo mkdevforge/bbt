@@ -13,9 +13,9 @@ namespace Bbt.Commands.Pr;
 
 public sealed class PrListCommand : BbtAsyncCommand<PrListCommand.Settings>
 {
-    public sealed class Settings : BbtSettings
+    public sealed class Settings : BbtRepoSettings
     {
-        [Description("PR state filter (OPEN, MERGED, DECLINED, SUPERSEDED).")]
+        [Description("PR state filter (OPEN, MERGED, DECLINED, SUPERSEDED). Default: OPEN.")]
         [CommandOption("--state <STATE>")]
         public string State { get; init; } = "OPEN";
 

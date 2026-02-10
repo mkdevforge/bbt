@@ -14,7 +14,7 @@ namespace Bbt.Commands.Pr;
 
 public sealed class PrCommentCommand : BbtAsyncCommand<PrCommentCommand.Settings>
 {
-    public sealed class Settings : BbtSettings
+    public sealed class Settings : BbtRepoSettings
     {
         [Description("Target pull request id.")]
         [CommandArgument(0, "<ID>")]
@@ -40,7 +40,7 @@ public sealed class PrCommentCommand : BbtAsyncCommand<PrCommentCommand.Settings
         [CommandOption("--line-end <N>")]
         public int? LineEnd { get; init; }
 
-        [Description("Inline side: 'to' (new) or 'from' (old).")]
+        [Description("Inline side: 'to' (new) or 'from' (old). Default: to.")]
         [CommandOption("--side <SIDE>")]
         public string Side { get; init; } = "to";
 

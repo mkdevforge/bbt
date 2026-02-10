@@ -3,16 +3,8 @@ using Spectre.Cli;
 
 namespace Bbt.Infrastructure;
 
-public abstract class BbtSettings : CommandSettings
+public abstract class BbtOutputSettings : CommandSettings
 {
-    [Description("Override workspace slug for this command.")]
-    [CommandOption("--workspace <WORKSPACE>")]
-    public string? Workspace { get; init; }
-
-    [Description("Override repository slug for this command.")]
-    [CommandOption("--repo <REPO>")]
-    public string? Repo { get; init; }
-
     [Description("Output JSON only.")]
     [CommandOption("--json")]
     public bool Json { get; init; }
@@ -28,14 +20,6 @@ public abstract class BbtSettings : CommandSettings
     [Description("Minimal output for scripting.")]
     [CommandOption("--quiet")]
     public bool Quiet { get; init; }
-
-    [Description("Print request/response diagnostics to stderr.")]
-    [CommandOption("--verbose")]
-    public bool Verbose { get; init; }
-
-    [Description("Disable transient retry/backoff.")]
-    [CommandOption("--no-retry")]
-    public bool NoRetry { get; init; }
 
     public OutputMode GetOutputMode()
     {
@@ -71,4 +55,29 @@ public abstract class BbtSettings : CommandSettings
 
         return ValidationResult.Success();
     }
+}
+
+public abstract class BbtNetworkSettings : BbtOutputSettings
+{
+    [Description("Print request/response diagnostics to stderr.")]
+    [CommandOption("--verbose")]
+    public bool Verbose { get; init; }
+
+    [Description("Disable transient retry/backoff.")]
+    [CommandOption("--no-retry")]
+    public bool NoRetry { get; init; }
+}
+
+public abstract class BbtWorkspaceSettings : BbtNetworkSettings
+{
+    [Description("Override workspace slug for this command.")]
+    [CommandOption("--workspace <WORKSPACE>")]
+    public string? Workspace { get; init; }
+}
+
+public abstract class BbtRepoSettings : BbtWorkspaceSettings
+{
+    [Description("Override repository slug for this command.")]
+    [CommandOption("--repo <REPO>")]
+    public string? Repo { get; init; }
 }

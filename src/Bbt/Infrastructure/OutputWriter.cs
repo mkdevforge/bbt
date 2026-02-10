@@ -14,7 +14,7 @@ public sealed class OutputWriter
         _processRunner = processRunner;
     }
 
-    public async Task WriteJsonAsync<T>(T model, BbtSettings settings, CancellationToken cancellationToken = default)
+    public async Task WriteJsonAsync<T>(T model, BbtOutputSettings settings, CancellationToken cancellationToken = default)
     {
         var node = JsonFieldSelector.SerializeToNode(model, BbtJson.OutputSerializerOptions);
 
@@ -69,4 +69,3 @@ public sealed class OutputWriter
         Console.Out.WriteLine(value);
     }
 }
-
