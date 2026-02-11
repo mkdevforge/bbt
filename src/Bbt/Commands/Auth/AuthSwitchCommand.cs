@@ -38,7 +38,7 @@ public sealed class AuthSwitchCommand : BbtAsyncCommand<AuthSwitchCommand.Settin
                 await new OutputWriter(new ProcessRunner()).WriteJsonAsync(new { currentProfile = settings.Profile }, settings);
                 return 0;
             default:
-                Spectre.Console.AnsiConsole.MarkupLine($"Switched to profile [yellow]{Markup.Escape(settings.Profile)}[/].");
+                Spectre.Console.AnsiConsole.MarkupLine($"Switched to profile [yellow]{TerminalSanitizer.EscapeMarkup(settings.Profile)}[/].");
                 return 0;
         }
     }

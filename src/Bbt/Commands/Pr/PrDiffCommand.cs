@@ -61,7 +61,7 @@ public sealed class PrDiffCommand : BbtAsyncCommand<PrDiffCommand.Settings>
             case OutputMode.Quiet:
                 return 0;
             default:
-                Console.Out.Write(rawDiff);
+                Console.Out.Write(TerminalSanitizer.Sanitize(rawDiff));
                 return 0;
         }
     }

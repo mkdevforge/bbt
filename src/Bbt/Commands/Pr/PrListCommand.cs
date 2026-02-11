@@ -71,7 +71,12 @@ public sealed class PrListCommand : BbtAsyncCommand<PrListCommand.Settings>
                     var author = pr.Author?.DisplayName ?? pr.Author?.Nickname ?? pr.Author?.Uuid ?? "";
                     var branch = $"{pr.SourceBranch ?? "?"} -> {pr.DestinationBranch ?? "?"}";
                     var updated = pr.UpdatedOn?.ToString("u") ?? "";
-                    table.AddRow(pr.Id.ToString(), pr.Title, author, branch, updated);
+                    table.AddRow(
+                        TerminalSanitizer.EscapeMarkup(pr.Id.ToString()),
+                        TerminalSanitizer.EscapeMarkup(pr.Title),
+                        TerminalSanitizer.EscapeMarkup(author),
+                        TerminalSanitizer.EscapeMarkup(branch),
+                        TerminalSanitizer.EscapeMarkup(updated));
                 }
 
                 Spectre.Console.AnsiConsole.Render(table);

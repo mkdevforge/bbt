@@ -162,6 +162,8 @@ Workspace and repo can come from different sources in the same invocation.
 - `BBT_WORKSPACE`
 - `BBT_REPO`
 - `BBT_BASE_URL` (default: `https://api.bitbucket.org/2.0`)
+- `BBT_ALLOW_INSECURE_HTTP` (set to allow sending credentials over `http://` URLs; not recommended)
+- `BBT_DISABLE_CRL_CHECK` (set to disable TLS certificate revocation checking)
 
 Environment values override profile values.
 

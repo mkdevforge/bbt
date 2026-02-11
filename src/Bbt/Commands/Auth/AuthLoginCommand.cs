@@ -136,10 +136,10 @@ public sealed class AuthLoginCommand : BbtAsyncCommand<AuthLoginCommand.Settings
                 return 0;
             default:
                 var who = user.DisplayName ?? user.Nickname ?? user.Uuid ?? "unknown user";
-                Spectre.Console.AnsiConsole.MarkupLine($"Logged in as [green]{Markup.Escape(who)}[/] (profile [yellow]{Markup.Escape(profileName)}[/]) using {credentialStore.Description}.");
+                Spectre.Console.AnsiConsole.MarkupLine($"Logged in as [green]{TerminalSanitizer.EscapeMarkup(who)}[/] (profile [yellow]{TerminalSanitizer.EscapeMarkup(profileName)}[/]) using {credentialStore.Description}.");
                 if (ws is not null)
                 {
-                    Spectre.Console.AnsiConsole.MarkupLine($"Default workspace: [yellow]{Markup.Escape(ws.Slug ?? workspace ?? string.Empty)}[/]");
+                    Spectre.Console.AnsiConsole.MarkupLine($"Default workspace: [yellow]{TerminalSanitizer.EscapeMarkup(ws.Slug ?? workspace ?? string.Empty)}[/]");
                 }
 
                 return 0;

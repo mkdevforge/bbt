@@ -1,8 +1,10 @@
 using System.Net;
 using System.Net.Http.Headers;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Bbt.Core.Bitbucket.Models;
+using Bbt.Core.Util;
 
 namespace Bbt.Core.Bitbucket;
 
@@ -17,16 +19,24 @@ public sealed class BitbucketClient : IDisposable
     private readonly AuthenticationHeaderValue _authorizationHeader;
     private readonly BitbucketClientOptions _options;
     private readonly bool _allowAuthToBitbucketHosts;
+    private const string AllowInsecureHttpEnv = "BBT_ALLOW_INSECURE_HTTP";
+    private const string DisableCrlCheckEnv = "BBT_DISABLE_CRL_CHECK";
 
     public BitbucketClient(BitbucketClientOptions options, HttpMessageHandler? handler = null)
     {
         _options = options;
+        EnsureSecureTransportOrThrow(options.BaseUri, "base URL");
+        var checkCrl = BbtEnvironment.GetNonEmptyOrNull(DisableCrlCheckEnv) is null;
         if (handler is HttpClientHandler httpHandler)
         {
             httpHandler.AllowAutoRedirect = false;
         }
 
-        handler ??= new HttpClientHandler { AllowAutoRedirect = false };
+        handler ??= new HttpClientHandler
+        {
+            AllowAutoRedirect = false,
+            CheckCertificateRevocationList = checkCrl,
+        };
         _http = new HttpClient(handler);
         _http.BaseAddress = options.BaseUri;
         _http.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -304,6 +314,7 @@ public sealed class BitbucketClient : IDisposable
         var requestUri = ResolveAbsoluteUri(request.RequestUri);
         if (requestUri is not null && request.Headers.Authorization is null && ShouldSendAuthorization(requestUri))
         {
+            EnsureSecureTransportOrThrow(requestUri, "request URL");
             request.Headers.Authorization = _authorizationHeader;
         }
 
@@ -376,6 +387,19 @@ public sealed class BitbucketClient : IDisposable
             host.EndsWith(".bitbucket.org", StringComparison.OrdinalIgnoreCase);
     }
 
+    private static void EnsureSecureTransportOrThrow(Uri uri, string description)
+    {
+        if (BbtEnvironment.GetNonEmptyOrNull(AllowInsecureHttpEnv) is not null)
+        {
+            return;
+        }
+
+        if (!uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException($"Refusing to use non-HTTPS {description} '{uri}'. Set {AllowInsecureHttpEnv}=1 to override.");
+        }
+    }
+
     private static bool IsTransient(HttpStatusCode statusCode)
     {
         return statusCode is HttpStatusCode.TooManyRequests
@@ -396,7 +420,7 @@ public sealed class BitbucketClient : IDisposable
         }
 
         var baseDelay = TimeSpan.FromSeconds(Math.Min(30, Math.Pow(2, attempt)));
-        var jitter = TimeSpan.FromMilliseconds(Random.Shared.Next(0, 250));
+        var jitter = TimeSpan.FromMilliseconds(RandomNumberGenerator.GetInt32(0, 250));
         return baseDelay + jitter;
     }
 

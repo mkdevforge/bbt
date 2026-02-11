@@ -67,10 +67,12 @@ public sealed class PrCommentsCommand : BbtAsyncCommand<PrCommentsCommand.Settin
                     var where = c.Inline?.Path is null
                         ? ""
                         : $" ({c.Inline.Path}:{c.Inline.StartTo ?? c.Inline.StartFrom ?? c.Inline.To ?? c.Inline.From}-{c.Inline.To ?? c.Inline.From})";
-                    Spectre.Console.AnsiConsole.MarkupLine($"[yellow]#{c.Id}[/] {Markup.Escape(who)}{Markup.Escape(where)}");
-                    if (!string.IsNullOrWhiteSpace(c.Body))
+                    Spectre.Console.AnsiConsole.MarkupLine($"[yellow]#{c.Id}[/] {TerminalSanitizer.EscapeMarkup(who)}{TerminalSanitizer.EscapeMarkup(where)}");
+
+                    var body = TerminalSanitizer.Sanitize(c.Body);
+                    if (!string.IsNullOrWhiteSpace(body))
                     {
-                        Spectre.Console.AnsiConsole.WriteLine(c.Body);
+                        Spectre.Console.AnsiConsole.WriteLine(body);
                     }
 
                     Spectre.Console.AnsiConsole.WriteLine();

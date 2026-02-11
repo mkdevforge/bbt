@@ -92,15 +92,19 @@ public sealed class WindowsCredentialStore : ICredentialStore
 
     private static string GetTargetName(string profile) => $"bbt:{profile}";
 
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [DllImport("Advapi32.dll", SetLastError = true, EntryPoint = "CredWriteW", CharSet = CharSet.Unicode)]
     private static extern bool CredWrite([In] ref NativeCredential userCredential, [In] uint flags);
 
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [DllImport("Advapi32.dll", SetLastError = true, EntryPoint = "CredReadW", CharSet = CharSet.Unicode)]
     private static extern bool CredRead(string target, uint type, uint reservedFlag, out IntPtr credentialPtr);
 
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [DllImport("Advapi32.dll", SetLastError = true, EntryPoint = "CredDeleteW", CharSet = CharSet.Unicode)]
     private static extern bool CredDelete(string target, uint type, uint flags);
 
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [DllImport("Advapi32.dll", SetLastError = true)]
     private static extern void CredFree([In] IntPtr buffer);
 

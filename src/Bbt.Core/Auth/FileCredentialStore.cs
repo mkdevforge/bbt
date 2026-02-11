@@ -16,8 +16,47 @@ public sealed class FileCredentialStore : ICredentialStore
     public async Task StoreTokenAsync(string profile, string token, CancellationToken cancellationToken = default)
     {
         Directory.CreateDirectory(_tokenDirectory);
+
+        if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
+        {
+            TrySet0700(_tokenDirectory);
+        }
+
         var path = Path.Combine(_tokenDirectory, $"{Sanitize(profile)}.token");
-        await File.WriteAllTextAsync(path, token, cancellationToken);
+        var tempPath = $"{path}.{Guid.NewGuid():N}.tmp";
+
+        try
+        {
+            await File.WriteAllTextAsync(tempPath, token, cancellationToken);
+
+            if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
+            {
+                TrySet0600(tempPath);
+            }
+
+            if (File.Exists(path))
+            {
+                File.Replace(tempPath, path, null);
+            }
+            else
+            {
+                File.Move(tempPath, path);
+            }
+        }
+        finally
+        {
+            if (File.Exists(tempPath))
+            {
+                try
+                {
+                    File.Delete(tempPath);
+                }
+                catch
+                {
+                    // Best-effort only.
+                }
+            }
+        }
 
         if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
         {
@@ -60,6 +99,20 @@ public sealed class FileCredentialStore : ICredentialStore
         try
         {
             File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+        }
+        catch
+        {
+            // Best-effort only.
+        }
+    }
+
+    [SupportedOSPlatform("linux")]
+    [SupportedOSPlatform("macos")]
+    private static void TrySet0700(string path)
+    {
+        try
+        {
+            File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
         }
         catch
         {

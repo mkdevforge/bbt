@@ -52,25 +52,26 @@ public sealed class PrViewCommand : BbtAsyncCommand<PrViewCommand.Settings>
                 await new OutputWriter(processRunner).WriteJsonAsync(view, settings);
                 return 0;
             default:
-                Spectre.Console.AnsiConsole.MarkupLine($"[yellow]#{view.Id}[/] {Markup.Escape(view.Title)}");
-                Spectre.Console.AnsiConsole.MarkupLine($"State: {Markup.Escape(view.State)}");
+                Spectre.Console.AnsiConsole.MarkupLine($"[yellow]#{view.Id}[/] {TerminalSanitizer.EscapeMarkup(view.Title)}");
+                Spectre.Console.AnsiConsole.MarkupLine($"State: {TerminalSanitizer.EscapeMarkup(view.State)}");
                 if (!string.IsNullOrWhiteSpace(view.HtmlUrl))
                 {
-                    Spectre.Console.AnsiConsole.MarkupLine($"URL: {Markup.Escape(view.HtmlUrl)}");
+                    Spectre.Console.AnsiConsole.MarkupLine($"URL: {TerminalSanitizer.EscapeMarkup(view.HtmlUrl)}");
                 }
 
                 var author = view.Author?.DisplayName ?? view.Author?.Nickname ?? view.Author?.Uuid;
                 if (!string.IsNullOrWhiteSpace(author))
                 {
-                    Spectre.Console.AnsiConsole.MarkupLine($"Author: {Markup.Escape(author)}");
+                    Spectre.Console.AnsiConsole.MarkupLine($"Author: {TerminalSanitizer.EscapeMarkup(author)}");
                 }
 
-                Spectre.Console.AnsiConsole.MarkupLine($"Branch: {Markup.Escape(view.SourceBranch ?? "?")} -> {Markup.Escape(view.DestinationBranch ?? "?")}");
+                Spectre.Console.AnsiConsole.MarkupLine($"Branch: {TerminalSanitizer.EscapeMarkup(view.SourceBranch ?? "?")} -> {TerminalSanitizer.EscapeMarkup(view.DestinationBranch ?? "?")}");
 
-                if (!string.IsNullOrWhiteSpace(view.Description))
+                var description = TerminalSanitizer.Sanitize(view.Description);
+                if (!string.IsNullOrWhiteSpace(description))
                 {
                     Spectre.Console.AnsiConsole.WriteLine();
-                    Spectre.Console.AnsiConsole.WriteLine(view.Description);
+                    Spectre.Console.AnsiConsole.WriteLine(description);
                 }
 
                 return 0;

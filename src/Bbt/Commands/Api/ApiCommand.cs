@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Net;
 using System.Net.Http.Headers;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -17,6 +18,9 @@ namespace Bbt.Commands.Api;
 
 public sealed class ApiCommand : BbtAsyncCommand<ApiCommand.Settings>
 {
+    private const string AllowInsecureHttpEnv = "BBT_ALLOW_INSECURE_HTTP";
+    private const string DisableCrlCheckEnv = "BBT_DISABLE_CRL_CHECK";
+
     public sealed class Settings : BbtRepoSettings
     {
         [Description("Bitbucket API path or absolute URL. Supports {workspace}/{repo} placeholders.")]
@@ -52,7 +56,11 @@ public sealed class ApiCommand : BbtAsyncCommand<ApiCommand.Settings>
         var authorizationHeader = new AuthenticationHeaderValue("Basic", authHeaderValue);
         var allowAuthToBitbucketHosts = IsBitbucketHost(auth.BaseUri.Host);
 
-        using var handler = new HttpClientHandler { AllowAutoRedirect = false };
+        using var handler = new HttpClientHandler
+        {
+            AllowAutoRedirect = false,
+            CheckCertificateRevocationList = BbtEnvironment.GetNonEmptyOrNull(DisableCrlCheckEnv) is null,
+        };
         using var http = new HttpClient(handler);
         http.BaseAddress = auth.BaseUri;
         http.DefaultRequestHeaders.UserAgent.ParseAdd($"bbt/{typeof(ApiCommand).Assembly.GetName().Version}");
@@ -110,7 +118,7 @@ public sealed class ApiCommand : BbtAsyncCommand<ApiCommand.Settings>
             Console.Error.WriteLine($"{(int)response.StatusCode} {response.StatusCode}");
             if (!string.IsNullOrWhiteSpace(body))
             {
-                Console.Error.WriteLine(body);
+                Console.Error.WriteLine(TerminalSanitizer.Sanitize(body));
             }
 
             return 1;
@@ -129,7 +137,7 @@ public sealed class ApiCommand : BbtAsyncCommand<ApiCommand.Settings>
             case OutputMode.Quiet:
                 return 0;
             default:
-                Console.Out.WriteLine(body);
+                Console.Out.WriteLine(TerminalSanitizer.Sanitize(body));
                 return 0;
         }
     }
@@ -310,7 +318,7 @@ public sealed class ApiCommand : BbtAsyncCommand<ApiCommand.Settings>
                 Console.Error.WriteLine($"{(int)response.StatusCode} {response.StatusCode}");
                 if (!string.IsNullOrWhiteSpace(body))
                 {
-                    Console.Error.WriteLine(body);
+                    Console.Error.WriteLine(TerminalSanitizer.Sanitize(body));
                 }
 
                 throw new InvalidOperationException("Paginated request failed.");
@@ -481,6 +489,7 @@ public sealed class ApiCommand : BbtAsyncCommand<ApiCommand.Settings>
         var resolvedUri = ResolveAbsoluteUri(baseUri, request.RequestUri);
         if (resolvedUri is not null && request.Headers.Authorization is null && ShouldSendAuthorization(resolvedUri, baseUri, allowAuthToBitbucketHosts))
         {
+            EnsureSecureTransportOrThrow(resolvedUri, "request URL");
             request.Headers.Authorization = authorizationHeader;
         }
 
@@ -557,6 +566,19 @@ public sealed class ApiCommand : BbtAsyncCommand<ApiCommand.Settings>
             host.EndsWith(".bitbucket.org", StringComparison.OrdinalIgnoreCase);
     }
 
+    private static void EnsureSecureTransportOrThrow(Uri uri, string description)
+    {
+        if (BbtEnvironment.GetNonEmptyOrNull(AllowInsecureHttpEnv) is not null)
+        {
+            return;
+        }
+
+        if (!uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException($"Refusing to use non-HTTPS {description} '{uri}'. Set {AllowInsecureHttpEnv}=1 to override.");
+        }
+    }
+
     private static bool IsTransient(HttpStatusCode statusCode)
     {
         return statusCode is HttpStatusCode.TooManyRequests
@@ -577,7 +599,7 @@ public sealed class ApiCommand : BbtAsyncCommand<ApiCommand.Settings>
         }
 
         var baseDelay = TimeSpan.FromSeconds(Math.Min(30, Math.Pow(2, attempt)));
-        var jitter = TimeSpan.FromMilliseconds(Random.Shared.Next(0, 250));
+        var jitter = TimeSpan.FromMilliseconds(RandomNumberGenerator.GetInt32(0, 250));
         return baseDelay + jitter;
     }
 

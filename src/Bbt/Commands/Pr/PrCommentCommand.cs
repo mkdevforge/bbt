@@ -143,7 +143,7 @@ public sealed class PrCommentCommand : BbtAsyncCommand<PrCommentCommand.Settings
                 return 0;
             default:
                 var link = string.IsNullOrWhiteSpace(output.HtmlUrl) ? string.Empty : $" {output.HtmlUrl}";
-                Spectre.Console.AnsiConsole.MarkupLine($"Posted comment [yellow]#{output.Id}[/].{Markup.Escape(link)}");
+                Spectre.Console.AnsiConsole.MarkupLine($"Posted comment [yellow]#{output.Id}[/].{TerminalSanitizer.EscapeMarkup(link)}");
                 return 0;
         }
     }

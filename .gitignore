@@ -1,6 +1,7 @@
 bin/
 obj/
 TestResults/
+artifacts/
 .vs/
 .vscode/
 .idea/
