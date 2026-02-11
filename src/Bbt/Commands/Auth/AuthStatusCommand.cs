@@ -81,24 +81,24 @@ public sealed class AuthStatusCommand : BbtAsyncCommand<AuthStatusCommand.Settin
                 OutputWriter.WriteQuiet(profileName);
                 return 0;
             default:
-                Spectre.Console.AnsiConsole.MarkupLine($"Profile: [yellow]{Markup.Escape(profileName)}[/]");
-                Spectre.Console.AnsiConsole.MarkupLine($"Email: {Markup.Escape(email ?? "(not set)")}");
+                Spectre.Console.AnsiConsole.MarkupLine($"Profile: [yellow]{TerminalSanitizer.EscapeMarkup(profileName)}[/]");
+                Spectre.Console.AnsiConsole.MarkupLine($"Email: {TerminalSanitizer.EscapeMarkup(email ?? "(not set)")}");
                 Spectre.Console.AnsiConsole.MarkupLine($"Token: {(hasToken ? "[green]present[/]" : "[red]missing[/]")} (source: {(envToken is null ? "store" : "env")}, store: {credentialStore.Description})");
-                Spectre.Console.AnsiConsole.MarkupLine($"Base URL: {Markup.Escape(baseUrl)}");
+                Spectre.Console.AnsiConsole.MarkupLine($"Base URL: {TerminalSanitizer.EscapeMarkup(baseUrl)}");
                 if (!string.IsNullOrWhiteSpace(profile?.DefaultWorkspace))
                 {
-                    Spectre.Console.AnsiConsole.MarkupLine($"Default workspace: [yellow]{Markup.Escape(profile.DefaultWorkspace)}[/]");
+                    Spectre.Console.AnsiConsole.MarkupLine($"Default workspace: [yellow]{TerminalSanitizer.EscapeMarkup(profile.DefaultWorkspace)}[/]");
                 }
 
                 if (!string.IsNullOrWhiteSpace(profile?.DefaultRepo))
                 {
-                    Spectre.Console.AnsiConsole.MarkupLine($"Default repo: [yellow]{Markup.Escape(profile.DefaultRepo)}[/]");
+                    Spectre.Console.AnsiConsole.MarkupLine($"Default repo: [yellow]{TerminalSanitizer.EscapeMarkup(profile.DefaultRepo)}[/]");
                 }
 
                 if (user is not null)
                 {
                     var who = user.DisplayName ?? user.Nickname ?? user.Uuid ?? "unknown";
-                    Spectre.Console.AnsiConsole.MarkupLine($"Authenticated as: [green]{Markup.Escape(who)}[/]");
+                    Spectre.Console.AnsiConsole.MarkupLine($"Authenticated as: [green]{TerminalSanitizer.EscapeMarkup(who)}[/]");
                 }
 
                 if (settings.Check)

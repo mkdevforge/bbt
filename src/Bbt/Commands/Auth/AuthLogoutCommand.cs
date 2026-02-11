@@ -45,7 +45,7 @@ public sealed class AuthLogoutCommand : BbtAsyncCommand<AuthLogoutCommand.Settin
                 await new OutputWriter(processRunner).WriteJsonAsync(new { loggedOutProfile = profileName }, settings);
                 return 0;
             default:
-                Spectre.Console.AnsiConsole.MarkupLine($"Logged out profile [yellow]{Markup.Escape(profileName)}[/].");
+                Spectre.Console.AnsiConsole.MarkupLine($"Logged out profile [yellow]{TerminalSanitizer.EscapeMarkup(profileName)}[/].");
                 return 0;
         }
     }
