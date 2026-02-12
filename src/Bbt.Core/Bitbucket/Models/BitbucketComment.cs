@@ -5,7 +5,7 @@ namespace Bbt.Core.Bitbucket.Models;
 public sealed class BitbucketComment
 {
     [JsonPropertyName("id")]
-    public int Id { get; set; }
+    public long Id { get; set; }
 
     [JsonPropertyName("content")]
     public BitbucketCommentContent? Content { get; set; }
@@ -16,11 +16,26 @@ public sealed class BitbucketComment
     [JsonPropertyName("user")]
     public BitbucketAccount? User { get; set; }
 
+    [JsonPropertyName("parent")]
+    public BitbucketCommentParent? Parent { get; set; }
+
     [JsonPropertyName("created_on")]
     public DateTimeOffset? CreatedOn { get; set; }
 
+    [JsonPropertyName("updated_on")]
+    public DateTimeOffset? UpdatedOn { get; set; }
+
+    [JsonPropertyName("deleted")]
+    public bool? Deleted { get; set; }
+
     [JsonPropertyName("links")]
     public BitbucketLinks? Links { get; set; }
+}
+
+public sealed class BitbucketCommentParent
+{
+    [JsonPropertyName("id")]
+    public long Id { get; set; }
 }
 
 public sealed class BitbucketCommentContent
@@ -52,4 +67,3 @@ public sealed class BitbucketCommentInline
     [JsonPropertyName("start_from")]
     public int? StartFrom { get; set; }
 }
-

@@ -77,8 +77,9 @@ public sealed class LlmsCommand : Command<LlmsCommand.Settings>
                 new LlmsCommandEntry("bbt pr list [--state <OPEN|MERGED|DECLINED|SUPERSEDED>] [--limit <n>]", "List pull requests (default state: OPEN)."),
                 new LlmsCommandEntry("bbt pr view [<id>]", "View pull request details. Infers id from current branch when omitted."),
                 new LlmsCommandEntry("bbt pr diff [<id>] [--include-raw]", "Show raw diff in human mode, structured diff in JSON mode."),
-                new LlmsCommandEntry("bbt pr comments [<id>] [--limit <n>]", "List pull request comments."),
-                new LlmsCommandEntry("bbt pr comment <id> (--body <text> | --body-file <path>) [--file <path> --line <n> [--line-end <n>] [--side <to|from>]]", "Post global or inline comment (default inline side: to)."),
+                new LlmsCommandEntry("bbt pr comments [<id>] [--limit <n>] [--sort <expr>] [--page <n>] [--pagelen <n>] [--paginate] [--contains <text> | -q/--query <expr>]", "List pull request comments (default: newest-first and one page unless --paginate/--limit requires more)."),
+                new LlmsCommandEntry("bbt pr threads [<id>] [--limit <n>] [--sort <expr>] [--pagelen <n>] [--contains <text> | -q/--query <expr>]", "List pull request comment threads (root + replies; newest activity first)."),
+                new LlmsCommandEntry("bbt pr comment <id> (--body <text> | --body-file <path>) [--reply-to <comment-id>] [--file <path> --line <n> [--line-end <n>] [--side <to|from>]]", "Post global, inline, or reply comment (default inline side: to)."),
                 new LlmsCommandEntry("bbt pr review <id> (--approve|--unapprove|--request-changes|--unrequest-changes) [--body <text>|--body-file <path>]", "Apply review status; optional body posts global comment first."),
                 new LlmsCommandEntry("bbt api <PATH> <METHOD> [--input <file>] [--paginate]", "Raw Bitbucket API access with placeholder replacement for {workspace}/{repo}. <METHOD> <PATH> order is also accepted."),
                 new LlmsCommandEntry("bbt llms [--json]", "Print this full CLI capability context.")
@@ -91,7 +92,7 @@ public sealed class LlmsCommand : Command<LlmsCommand.Settings>
                     "Current profile defaults",
                     "Git origin parsing"
                 ],
-                PullRequestIdInference: "For pr view/diff/comments, omitted id resolves from current branch's open PR.",
+                PullRequestIdInference: "For pr view/diff/comments/threads, omitted id resolves from current branch's open PR.",
                 MutationSafety: "pr comment and pr review require explicit pull request id.",
                 FieldsSelection: "For arrays, selected fields missing on some items are returned as null; unknown fields still fail."));
     }

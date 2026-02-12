@@ -89,17 +89,19 @@ If `--email`/`--token` are omitted, `auth login` prompts interactively (unless s
 - `bbt pr list [--state <STATE>] [--limit <n>]`
 - `bbt pr view [<id>]`
 - `bbt pr diff [<id>] [--include-raw]`
-- `bbt pr comments [<id>] [--limit <n>]`
-- `bbt pr comment <id> (--body <text> | --body-file <path>) [--file <path> --line <n> [--line-end <n>] [--side <to|from>]]`
+- `bbt pr comments [<id>] [--limit <n>] [--sort <expr>] [--page <n>] [--pagelen <n>] [--paginate] [--contains <text> | -q/--query <expr>]`
+- `bbt pr threads [<id>] [--limit <n>] [--sort <expr>] [--pagelen <n>] [--contains <text> | -q/--query <expr>]`
+- `bbt pr comment <id> (--body <text> | --body-file <path>) [--reply-to <comment-id>] [--file <path> --line <n> [--line-end <n>] [--side <to|from>]]`
 - `bbt pr review <id> (--approve|--unapprove|--request-changes|--unrequest-changes) [--body <text>|--body-file <path>]`
 
 Notes:
 
-- For `pr view`, `pr diff`, and `pr comments`, `<id>` is optional.
+- For `pr view`, `pr diff`, `pr comments`, and `pr threads`, `<id>` is optional.
 - If `<id>` is omitted, `bbt` tries to resolve the PR from your current git branch.
 - `pr list` defaults to `--state OPEN`.
 - `pr comment` and `pr review` always require explicit PR id.
 - Inline comments default to `--side to` (new side).
+- `pr comments` defaults to newest-first (`--sort -created_on`) and returns one page by default (50 comments). Use `--paginate`, a larger `--pagelen`, or `--limit` to fetch more.
 - `pr review --body/--body-file` posts a global comment first, then performs the review action.
 
 ### Raw API access

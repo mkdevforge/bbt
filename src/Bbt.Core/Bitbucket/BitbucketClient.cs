@@ -125,10 +125,34 @@ public sealed class BitbucketClient : IDisposable
         string repo,
         int pullRequestId,
         int pageLen = 50,
+        int? page = null,
+        string? sort = null,
+        string? q = null,
         string? pageUrl = null,
         CancellationToken cancellationToken = default)
     {
-        var url = pageUrl ?? $"repositories/{Uri.EscapeDataString(workspace)}/{Uri.EscapeDataString(repo)}/pullrequests/{pullRequestId}/comments?pagelen={pageLen}";
+        var url = pageUrl;
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            var qs = new List<string> { $"pagelen={pageLen}" };
+            if (page is not null)
+            {
+                qs.Add($"page={page.Value}");
+            }
+
+            if (!string.IsNullOrWhiteSpace(sort))
+            {
+                qs.Add($"sort={Uri.EscapeDataString(sort)}");
+            }
+
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                qs.Add($"q={Uri.EscapeDataString(q)}");
+            }
+
+            url = $"repositories/{Uri.EscapeDataString(workspace)}/{Uri.EscapeDataString(repo)}/pullrequests/{pullRequestId}/comments?{string.Join("&", qs)}";
+        }
+
         return await SendJsonAsync<BitbucketPaginated<BitbucketComment>>(() => new HttpRequestMessage(HttpMethod.Get, url), cancellationToken);
     }
 
