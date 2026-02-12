@@ -7,6 +7,10 @@ public sealed class CreatePullRequestCommentRequest
     [JsonPropertyName("content")]
     public CreatePullRequestCommentContent Content { get; set; } = new();
 
+    [JsonPropertyName("parent")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public CreatePullRequestCommentParent? Parent { get; set; }
+
     [JsonPropertyName("inline")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public CreatePullRequestCommentInline? Inline { get; set; }
@@ -16,6 +20,12 @@ public sealed class CreatePullRequestCommentContent
 {
     [JsonPropertyName("raw")]
     public string Raw { get; set; } = string.Empty;
+}
+
+public sealed class CreatePullRequestCommentParent
+{
+    [JsonPropertyName("id")]
+    public long Id { get; set; }
 }
 
 public sealed class CreatePullRequestCommentInline

@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Bbt.Core\Bbt.Core.csproj" />
+    <ProjectReference Include="..\..\src\Bbt\Bbt.csproj" />
   </ItemGroup>
 
 </Project>

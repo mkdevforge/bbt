@@ -87,7 +87,7 @@ public sealed class PrReviewCommand : BbtAsyncCommand<PrReviewCommand.Settings>
         var auth = await AuthContextResolver.ResolveAsync(configStore, credentialStore, profileOverride: null, requireToken: true);
         using var client = AuthContextResolver.CreateClient(auth, settings.Verbose, settings.NoRetry);
 
-        int? commentId = null;
+        long? commentId = null;
         if (!string.IsNullOrWhiteSpace(settings.Body) || !string.IsNullOrWhiteSpace(settings.BodyFile))
         {
             var body = settings.Body ?? await File.ReadAllTextAsync(settings.BodyFile!);

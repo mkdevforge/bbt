@@ -28,6 +28,10 @@ public sealed class PrCommentCommand : BbtAsyncCommand<PrCommentCommand.Settings
         [CommandOption("--body-file <PATH>")]
         public string? BodyFile { get; init; }
 
+        [Description("Reply to an existing pull request comment id (creates a threaded reply).")]
+        [CommandOption("--reply-to <COMMENT_ID>")]
+        public long? ReplyTo { get; init; }
+
         [Description("Inline file path; requires --line.")]
         [CommandOption("--file <PATH>")]
         public string? File { get; init; }
@@ -64,6 +68,16 @@ public sealed class PrCommentCommand : BbtAsyncCommand<PrCommentCommand.Settings
             if (hasFile != hasLine)
             {
                 return Spectre.Cli.ValidationResult.Error("--file and --line must be provided together for inline comments.");
+            }
+
+            if (ReplyTo is not null && ReplyTo <= 0)
+            {
+                return Spectre.Cli.ValidationResult.Error("--reply-to must be >= 1.");
+            }
+
+            if (ReplyTo is not null && (hasFile || hasLine))
+            {
+                return Spectre.Cli.ValidationResult.Error("--reply-to cannot be combined with inline comment options (--file/--line/--line-end/--side).");
             }
 
             if (LineEnd is not null && Line is null)
@@ -124,6 +138,11 @@ public sealed class PrCommentCommand : BbtAsyncCommand<PrCommentCommand.Settings
         {
             Content = new CreatePullRequestCommentContent { Raw = body },
         };
+
+        if (settings.ReplyTo is not null)
+        {
+            request.Parent = new CreatePullRequestCommentParent { Id = settings.ReplyTo.Value };
+        }
 
         if (!string.IsNullOrWhiteSpace(settings.File))
         {

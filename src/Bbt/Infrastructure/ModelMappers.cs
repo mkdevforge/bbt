@@ -57,6 +57,9 @@ public static class ModelMappers
             Body: comment.Content?.Raw,
             HtmlUrl: comment.Links?.Html?.Href,
             CreatedOn: comment.CreatedOn,
+            UpdatedOn: comment.UpdatedOn,
+            Deleted: comment.Deleted,
+            ParentId: comment.Parent?.Id,
             Inline: comment.Inline is null
                 ? null
                 : new PullRequestCommentInline(
@@ -67,4 +70,3 @@ public static class ModelMappers
                     StartFrom: comment.Inline.StartFrom));
     }
 }
-

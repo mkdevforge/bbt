@@ -1,11 +1,14 @@
 namespace Bbt.Models;
 
 public sealed record PullRequestComment(
-    int Id,
+    long Id,
     UserSummary? User,
     string? Body,
     string? HtmlUrl,
     DateTimeOffset? CreatedOn,
+    DateTimeOffset? UpdatedOn,
+    bool? Deleted,
+    long? ParentId,
     PullRequestCommentInline? Inline);
 
 public sealed record PullRequestCommentInline(
@@ -15,3 +18,8 @@ public sealed record PullRequestCommentInline(
     int? StartTo,
     int? StartFrom);
 
+public sealed record PullRequestCommentThread(
+    long RootId,
+    PullRequestComment Root,
+    List<PullRequestComment> Replies,
+    DateTimeOffset? LastActivityOn);
