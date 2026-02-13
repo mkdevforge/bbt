@@ -102,7 +102,29 @@ Notes:
 - `pr comment` and `pr review` always require explicit PR id.
 - Inline comments default to `--side to` (new side).
 - `pr comments` defaults to newest-first (`--sort -created_on`) and returns one page by default (50 comments). Use `--paginate`, a larger `--pagelen`, or `--limit` to fetch more.
+- `pr threads` groups comments into discussion threads (root + replies, including nested replies). Threads are ordered by discovery sort (default: `--sort -created_on`); with `--contains/-q`, ordering is based on the newest matching comment. Defaults: `--limit 20`, `--pagelen 100`.
 - `pr review --body/--body-file` posts a global comment first, then performs the review action.
+
+#### PR comment threads (recommended)
+
+Use this during code review to focus on discussions instead of a flat comment list.
+
+```bash
+# newest active threads for the PR of your current branch
+bbt pr threads
+
+# filter threads that mention a phrase (matches any comment in the thread)
+bbt pr threads --contains "AI Code Review"
+
+# JSON thread objects: root + replies + lastActivityOn
+bbt pr threads --json
+
+# root ids only (one per line)
+bbt pr threads --quiet
+
+# fetch more threads (may require more API calls)
+bbt pr threads --limit 50
+```
 
 ### Raw API access
 
@@ -186,4 +208,4 @@ Environment values override profile values.
 
 ## License
 
-MIT (`LICENSE`)
+MIT. See [LICENSE](LICENSE).
