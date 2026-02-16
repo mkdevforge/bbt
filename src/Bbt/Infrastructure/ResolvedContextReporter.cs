@@ -11,8 +11,10 @@ public static class ResolvedContextReporter
             return;
         }
 
-        var source = string.IsNullOrWhiteSpace(context.Source) ? "unknown" : context.Source;
-        Console.Error.WriteLine($"Context: workspace={context.Workspace} repo={context.Repo} source={source}");
+        var workspace = TerminalSanitizer.Sanitize(context.Workspace) ?? string.Empty;
+        var repo = TerminalSanitizer.Sanitize(context.Repo) ?? string.Empty;
+        var source = TerminalSanitizer.Sanitize(string.IsNullOrWhiteSpace(context.Source) ? "unknown" : context.Source) ?? "unknown";
+        Console.Error.WriteLine($"Context: workspace={workspace} repo={repo} source={source}");
     }
 
     public static void LogWorkspaceContext(BbtNetworkSettings settings, string workspace, string source)
@@ -22,7 +24,8 @@ public static class ResolvedContextReporter
             return;
         }
 
-        var resolvedSource = string.IsNullOrWhiteSpace(source) ? "unknown" : source;
-        Console.Error.WriteLine($"Context: workspace={workspace} source={resolvedSource}");
+        var resolvedWorkspace = TerminalSanitizer.Sanitize(workspace) ?? string.Empty;
+        var resolvedSource = TerminalSanitizer.Sanitize(string.IsNullOrWhiteSpace(source) ? "unknown" : source) ?? "unknown";
+        Console.Error.WriteLine($"Context: workspace={resolvedWorkspace} source={resolvedSource}");
     }
 }
