@@ -76,6 +76,7 @@ public sealed class LlmsCommand : Command<LlmsCommand.Settings>
                 new LlmsCommandEntry("bbt auth logout [--profile <name>]", "Delete token and profile."),
                 new LlmsCommandEntry("bbt pr list [--state <OPEN|MERGED|DECLINED|SUPERSEDED>] [--limit <n>]", "List pull requests (default state: OPEN)."),
                 new LlmsCommandEntry("bbt pr view [<id>]", "View pull request details. Infers id from current branch when omitted."),
+                new LlmsCommandEntry("bbt pr summary [<id>]", "Show a normalized pull request summary object for automation. Output: --quiet prints the PR id; --json emits one summary object with review, comment, diff, and mergedAt fields."),
                 new LlmsCommandEntry("bbt pr diff [<id>] [--include-raw]", "Show raw diff in human mode, structured diff in JSON mode."),
                 new LlmsCommandEntry("bbt pr comments [<id>] [--limit <n>] [--sort <expr>] [--page <n>] [--pagelen <n>] [--paginate] [--contains <text> | -q/--query <expr>]", "List pull request comments (default: newest-first and one page unless --paginate/--limit requires more)."),
                 new LlmsCommandEntry("bbt pr threads [<id>] [--limit <n>] [--sort <expr>] [--pagelen <n>] [--contains <text> | -q/--query <expr>]", "List pull request comment threads (root + replies, including nested replies). Threads are ordered by discovery sort (default: -created_on); with --contains/-q, ordering is based on the newest matching comment. Default: --limit 20, --pagelen 100. Filtering: --contains matches any comment in the thread (server-side discovery). Output: --quiet prints root ids; --json emits {rootId, root, replies, lastActivityOn}."),
@@ -92,7 +93,7 @@ public sealed class LlmsCommand : Command<LlmsCommand.Settings>
                     "Current profile defaults",
                     "Git origin parsing"
                 ],
-                PullRequestIdInference: "For pr view/diff/comments/threads, omitted id resolves from current branch's open PR.",
+                PullRequestIdInference: "For pr view/summary/diff/comments/threads, omitted id resolves from current branch's open PR.",
                 MutationSafety: "pr comment and pr review require explicit pull request id.",
                 FieldsSelection: "For arrays, selected fields missing on some items are returned as null; unknown fields still fail."));
     }
