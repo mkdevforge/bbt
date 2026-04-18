@@ -2,7 +2,7 @@
 
 This document pins the API contracts that `bbt` v0.1 depends on. It is intentionally narrow in scope: only the endpoints and fields used by the v0.1 command surface.
 
-Last reviewed: 2026-02-09
+Last reviewed: 2026-04-17
 
 ## 1) Base contract
 
@@ -128,6 +128,7 @@ Minimal fields `bbt` relies on:
 Used by:
 - `bbt pr list`
 - `bbt pr view` (when `<id>` is omitted; list+filter by `source.branch.name`)
+- `bbt pr summary` (when `<id>` is omitted; list+filter by `source.branch.name`)
 - `bbt pr diff` (when `<id>` is omitted)
 - `bbt pr comments` (when `<id>` is omitted)
 
@@ -154,6 +155,7 @@ Minimal fields `bbt` relies on:
 
 Used by:
 - `bbt pr view <id>`
+- `bbt pr summary <id>`
 
 Responses:
 - `200 application/json`: PR object
@@ -162,8 +164,27 @@ Responses:
 
 Minimal fields `bbt` relies on (in addition to list fields):
 - `description` (string)
+- `comment_count` (int; total PR comments count)
 - `reviewers[]` (array of accounts)
 - `participants[]` (array; used for “approved/changes_requested” state)
+
+#### `GET /repositories/{workspace}/{repo_slug}/pullrequests/{pull_request_id}/activity`
+
+Used by:
+- `bbt pr summary <id>` (only when the PR state is `MERGED`, to derive `mergedAt`)
+
+Responses:
+- `200 application/json`: paginated activity log
+- `401` (may be empty body)
+- `404 application/json`: not found/no access
+
+Minimal fields `bbt` relies on:
+- `values[].update.state` (string; `MERGED` entries indicate the merge state transition)
+- `values[].update.date` (ISO 8601; exact timestamp used for `mergedAt`)
+
+Notes:
+- `bbt` does not use `updated_on` as a merged timestamp fallback.
+- If no activity entry with `update.state == MERGED` is returned, `mergedAt` is emitted as `null`.
 
 #### `GET /repositories/{workspace}/{repo_slug}/pullrequests/{pull_request_id}/diff`
 
@@ -280,6 +301,7 @@ Responses:
 | `bbt auth status --check` | `GET /user` | `--check` is the only mode that hits the network. |
 | `bbt pr list` | `GET /repositories/{ws}/{repo}/pullrequests?state=…` (paged) | Defaults to `state=OPEN`. |
 | `bbt pr view <id>` | `GET /repositories/{ws}/{repo}/pullrequests/{id}` | If `<id>` omitted: list open PRs and filter by branch name. |
+| `bbt pr summary <id>` | `GET /repositories/{ws}/{repo}/pullrequests/{id}` + `GET /repositories/{ws}/{repo}/pullrequests/{id}/diff` + `GET /repositories/{ws}/{repo}/pullrequests/{id}/activity` (MERGED only) | Uses `comment_count` from the PR object; `mergedAt` comes from the latest activity `update.state == MERGED`, else `null`. |
 | `bbt pr diff <id>` | `GET /repositories/{ws}/{repo}/pullrequests/{id}/diff` (follow 302) | Human mode prints raw diff; JSON mode parses diff. |
 | `bbt pr comments <id>` | `GET /repositories/{ws}/{repo}/pullrequests/{id}/comments` (paged) | If `<id>` omitted: resolve PR by branch first. |
 | `bbt pr comment <id>` | `POST /repositories/{ws}/{repo}/pullrequests/{id}/comments` | Inline anchor uses `inline.*` fields. |
@@ -345,4 +367,3 @@ curl -u \"$BBT_EMAIL:$BBT_TOKEN\" \\
   -d '{\"content\":{\"raw\":\"inline comment\",\"markup\":\"markdown\"},\"inline\":{\"path\":\"src/Foo.cs\",\"to\":42}}' \\
   \"https://api.bitbucket.org/2.0/repositories/$BBT_WORKSPACE/$BBT_REPO/pullrequests/<PR_ID>/comments\"
 ```
-

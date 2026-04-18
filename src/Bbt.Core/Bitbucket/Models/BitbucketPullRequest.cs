@@ -34,6 +34,9 @@ public sealed class BitbucketPullRequest
     [JsonPropertyName("updated_on")]
     public DateTimeOffset? UpdatedOn { get; set; }
 
+    [JsonPropertyName("comment_count")]
+    public int? CommentCount { get; set; }
+
     [JsonPropertyName("reviewers")]
     public List<BitbucketAccount>? Reviewers { get; set; }
 
@@ -52,4 +55,3 @@ public sealed class BitbucketBranch
     [JsonPropertyName("name")]
     public string? Name { get; set; }
 }
-

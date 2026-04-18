@@ -25,10 +25,30 @@ public sealed record PullRequestView(
     List<UserSummary>? Reviewers,
     List<PullRequestParticipant>? Participants);
 
+public sealed record PullRequestSummary(
+    int PrId,
+    string Workspace,
+    string Repo,
+    string Title,
+    string State,
+    UserSummary? Author,
+    string? SourceBranch,
+    string? TargetBranch,
+    string? HtmlUrl,
+    DateTimeOffset? OpenedAt,
+    DateTimeOffset? UpdatedAt,
+    DateTimeOffset? MergedAt,
+    List<UserSummary> Reviewers,
+    int Approvals,
+    int ChangesRequested,
+    int CommentCount,
+    int FilesChanged,
+    int LinesAdded,
+    int LinesRemoved);
+
 public sealed record PullRequestParticipant(
     UserSummary? User,
     string? Role,
     bool? Approved,
     string? State,
     DateTimeOffset? ParticipatedOn);
-

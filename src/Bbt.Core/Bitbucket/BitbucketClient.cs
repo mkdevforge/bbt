@@ -83,6 +83,18 @@ public sealed class BitbucketClient : IDisposable
             cancellationToken);
     }
 
+    public async Task<BitbucketPaginated<BitbucketPullRequestActivity>> ListPullRequestActivityAsync(
+        string workspace,
+        string repo,
+        int pullRequestId,
+        int pageLen = 50,
+        string? pageUrl = null,
+        CancellationToken cancellationToken = default)
+    {
+        var url = pageUrl ?? $"repositories/{Uri.EscapeDataString(workspace)}/{Uri.EscapeDataString(repo)}/pullrequests/{pullRequestId}/activity?pagelen={pageLen}";
+        return await SendJsonAsync<BitbucketPaginated<BitbucketPullRequestActivity>>(() => new HttpRequestMessage(HttpMethod.Get, url), cancellationToken);
+    }
+
     public async Task<string> GetPullRequestDiffAsync(string workspace, string repo, int pullRequestId, CancellationToken cancellationToken = default)
     {
         var startUrl = $"repositories/{Uri.EscapeDataString(workspace)}/{Uri.EscapeDataString(repo)}/pullrequests/{pullRequestId}/diff";

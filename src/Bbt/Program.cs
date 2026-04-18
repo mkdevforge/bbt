@@ -25,6 +25,7 @@ app.Configure(config =>
         pr.SetDescription("Pull request operations.");
         pr.AddCommand<PrListCommand>("list").WithDescription("List pull requests (default: --state OPEN).");
         pr.AddCommand<PrViewCommand>("view").WithDescription("View pull request details (id inferred from current branch if omitted).");
+        pr.AddCommand<PrSummaryCommand>("summary").WithDescription("Show normalized pull request summary metrics (id inferred from current branch if omitted).");
         pr.AddCommand<PrDiffCommand>("diff").WithDescription("Show pull request diff (raw in human mode, structured in --json; id inferred from current branch if omitted).");
         pr.AddCommand<PrCommentsCommand>("comments").WithDescription("List pull request comments (default: newest-first, one page unless --paginate/--limit requires more; id inferred from current branch if omitted).");
         pr.AddCommand<PrThreadsCommand>("threads").WithDescription("List pull request comment threads (root + replies; ordered by discovery sort (default: -created_on); id inferred from current branch if omitted).");

@@ -1,4 +1,5 @@
 using Bbt.Core.Bitbucket.Models;
+using Bbt.Core.Diff;
 using Bbt.Models;
 
 namespace Bbt.Infrastructure;
@@ -49,6 +50,37 @@ public static class ModelMappers
             Participants: participants);
     }
 
+    public static PullRequestSummary ToPullRequestSummary(
+        BitbucketPullRequest pr,
+        string workspace,
+        string repo,
+        PullRequestDiffStats diffStats,
+        DateTimeOffset? mergedAt)
+    {
+        var reviewers = pr.Reviewers?.Select(ToUserSummary).Where(x => x is not null).Cast<UserSummary>().ToList() ?? [];
+
+        return new PullRequestSummary(
+            PrId: pr.Id,
+            Workspace: workspace,
+            Repo: repo,
+            Title: pr.Title,
+            State: pr.State,
+            Author: ToUserSummary(pr.Author),
+            SourceBranch: pr.Source?.Branch?.Name,
+            TargetBranch: pr.Destination?.Branch?.Name,
+            HtmlUrl: pr.Links?.Html?.Href,
+            OpenedAt: pr.CreatedOn,
+            UpdatedAt: pr.UpdatedOn,
+            MergedAt: mergedAt,
+            Reviewers: reviewers,
+            Approvals: CountApprovals(pr.Participants),
+            ChangesRequested: CountChangesRequested(pr.Participants),
+            CommentCount: pr.CommentCount ?? 0,
+            FilesChanged: diffStats.FilesChanged,
+            LinesAdded: diffStats.LinesAdded,
+            LinesRemoved: diffStats.LinesRemoved);
+    }
+
     public static PullRequestComment ToPullRequestComment(BitbucketComment comment)
     {
         return new PullRequestComment(
@@ -68,5 +100,35 @@ public static class ModelMappers
                     From: comment.Inline.From,
                     StartTo: comment.Inline.StartTo,
                     StartFrom: comment.Inline.StartFrom));
+    }
+
+    private static int CountApprovals(IEnumerable<BitbucketParticipant>? participants)
+    {
+        return participants?.Count(p => !IsChangesRequestedState(p.State) && (p.Approved == true || IsApprovedState(p.State))) ?? 0;
+    }
+
+    private static int CountChangesRequested(IEnumerable<BitbucketParticipant>? participants)
+    {
+        return participants?.Count(p => IsChangesRequestedState(p.State)) ?? 0;
+    }
+
+    private static bool IsApprovedState(string? state)
+    {
+        return string.Equals(NormalizeState(state), "approved", StringComparison.Ordinal);
+    }
+
+    private static bool IsChangesRequestedState(string? state)
+    {
+        return NormalizeState(state) is "changesrequested" or "requestchanges" or "requestedchanges" or "needswork";
+    }
+
+    private static string NormalizeState(string? state)
+    {
+        if (string.IsNullOrWhiteSpace(state))
+        {
+            return string.Empty;
+        }
+
+        return new string(state.Where(char.IsLetterOrDigit).ToArray()).ToLowerInvariant();
     }
 }

@@ -64,7 +64,13 @@ bbt pr list
 bbt pr view
 ```
 
-4. Get structured diff JSON:
+4. Get a normalized PR summary object for automation:
+
+```bash
+bbt pr summary --json
+```
+
+5. Get structured diff JSON:
 
 ```bash
 bbt pr diff <id> --json
@@ -88,6 +94,7 @@ If `--email`/`--token` are omitted, `auth login` prompts interactively (unless s
 
 - `bbt pr list [--state <STATE>] [--limit <n>]`
 - `bbt pr view [<id>]`
+- `bbt pr summary [<id>]`
 - `bbt pr diff [<id>] [--include-raw]`
 - `bbt pr comments [<id>] [--limit <n>] [--sort <expr>] [--page <n>] [--pagelen <n>] [--paginate] [--contains <text> | -q/--query <expr>]`
 - `bbt pr threads [<id>] [--limit <n>] [--sort <expr>] [--pagelen <n>] [--contains <text> | -q/--query <expr>]`
@@ -96,11 +103,12 @@ If `--email`/`--token` are omitted, `auth login` prompts interactively (unless s
 
 Notes:
 
-- For `pr view`, `pr diff`, `pr comments`, and `pr threads`, `<id>` is optional.
+- For `pr view`, `pr summary`, `pr diff`, `pr comments`, and `pr threads`, `<id>` is optional.
 - If `<id>` is omitted, `bbt` tries to resolve the PR from your current git branch.
 - `pr list` defaults to `--state OPEN`.
 - `pr comment` and `pr review` always require explicit PR id.
 - Inline comments default to `--side to` (new side).
+- `pr summary --json` emits one normalized metrics-friendly object. `mergedAt` comes from the PR activity log's `MERGED` state transition when Bitbucket exposes it; otherwise it is `null` instead of falling back to `updated_on`.
 - `pr comments` defaults to newest-first (`--sort -created_on`) and returns one page by default (50 comments). Use `--paginate`, a larger `--pagelen`, or `--limit` to fetch more.
 - `pr threads` groups comments into discussion threads (root + replies, including nested replies). Threads are ordered by discovery sort (default: `--sort -created_on`); with `--contains/-q`, ordering is based on the newest matching comment. Defaults: `--limit 20`, `--pagelen 100`.
 - `pr review --body/--body-file` posts a global comment first, then performs the review action.
