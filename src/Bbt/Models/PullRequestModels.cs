@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Bbt.Models;
 
 public sealed record PullRequestListItem(
@@ -37,6 +39,7 @@ public sealed record PullRequestSummary(
     string? HtmlUrl,
     DateTimeOffset? OpenedAt,
     DateTimeOffset? UpdatedAt,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     DateTimeOffset? MergedAt,
     List<UserSummary> Reviewers,
     int Approvals,
