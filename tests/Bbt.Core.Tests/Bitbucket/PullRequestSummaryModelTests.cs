@@ -1,6 +1,8 @@
 using Bbt.Core.Bitbucket.Models;
 using Bbt.Core.Diff;
 using Bbt.Infrastructure;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Bbt.Core.Tests.Bitbucket;
 
@@ -86,5 +88,36 @@ public sealed class PullRequestSummaryModelTests
         Assert.Equal(DateTimeOffset.Parse("2026-04-02T13:00:00Z"), summary.MergedAt);
         Assert.Single(summary.Reviewers);
         Assert.Equal("Author Name", summary.Author!.DisplayName);
+    }
+
+    [Fact]
+    public void PullRequestSummary_Serialization_IncludesMergedAtWhenNull()
+    {
+        var summary = new Bbt.Models.PullRequestSummary(
+            PrId: 1,
+            Workspace: "mkdevforge",
+            Repo: "bbt-demo",
+            Title: "Test",
+            State: "OPEN",
+            Author: null,
+            SourceBranch: "test-pr",
+            TargetBranch: "main",
+            HtmlUrl: "https://bitbucket.org/mkdevforge/bbt-demo/pull-requests/1",
+            OpenedAt: DateTimeOffset.Parse("2026-02-09T21:30:28.727793+00:00"),
+            UpdatedAt: DateTimeOffset.Parse("2026-02-13T16:17:08.848810+00:00"),
+            MergedAt: null,
+            Reviewers: [],
+            Approvals: 0,
+            ChangesRequested: 0,
+            CommentCount: 111,
+            FilesChanged: 14,
+            LinesAdded: 839,
+            LinesRemoved: 112);
+
+        var json = JsonSerializer.Serialize(summary, BbtJson.OutputSerializerOptions);
+        var node = JsonNode.Parse(json)!.AsObject();
+
+        Assert.True(node.ContainsKey("mergedAt"));
+        Assert.Null(node["mergedAt"]);
     }
 }
