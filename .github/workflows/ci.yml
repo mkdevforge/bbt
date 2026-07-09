@@ -32,7 +32,7 @@ jobs:
         run: dotnet build bbt.sln -c Release --no-restore
 
       - name: Test
-        run: dotnet test bbt.sln -c Release --no-build
+        run: dotnet test bbt.sln -c Release --no-build --collect:"XPlat Code Coverage"
 
       - name: Pack (smoke)
         run: dotnet pack src/Bbt/Bbt.csproj -c Release --no-build -o artifacts
