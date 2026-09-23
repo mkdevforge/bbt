@@ -45,5 +45,17 @@ public sealed class GitClient
 
         return value;
     }
+
+    public async Task<string?> TryGetCommitSubjectAsync(string revision, CancellationToken cancellationToken = default)
+    {
+        var result = await _processRunner.RunAsync("git", ["log", "-1", "--format=%s", "--end-of-options", revision, "--"], cancellationToken: cancellationToken);
+        if (result.ExitCode != 0)
+        {
+            return null;
+        }
+
+        var value = result.Stdout.Trim();
+        return string.IsNullOrWhiteSpace(value) ? null : value;
+    }
 }
 
