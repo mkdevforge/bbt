@@ -248,6 +248,37 @@ Responses:
 - `403 application/json`: insufficient permission
 - `404 application/json`: PR not found/no access
 
+#### `POST /repositories/{workspace}/{repo_slug}/pullrequests`
+
+Used by:
+- `bbt pr create`
+
+Request body:
+
+```json
+{
+  "title": "Add feature",
+  "description": "markdown text",
+  "source": { "branch": { "name": "feature/x" } },
+  "destination": { "branch": { "name": "main" } },
+  "reviewers": [{ "uuid": "{...}" }, { "account_id": "557058:..." }],
+  "close_source_branch": true,
+  "draft": true
+}
+```
+
+Rules:
+- `title` and `source.branch.name` are required.
+- `destination` is omitted when `--destination` is not given; Bitbucket then uses the repository main branch.
+- `description`, `reviewers`, `close_source_branch`, and `draft` are omitted unless set.
+- Reviewer values wrapped in braces are sent as `uuid`; all other values are sent as `account_id`.
+
+Responses:
+- `201 application/json`: created pull request object
+- `400 application/json`: invalid request (e.g., source branch not found, invalid reviewer)
+- `403 application/json`: insufficient permission
+- `404 application/json`: repository not found/no access
+
 ### 3.3 Review actions
 
 #### `POST /repositories/{workspace}/{repo_slug}/pullrequests/{pull_request_id}/approve`
@@ -304,6 +335,7 @@ Responses:
 | `bbt pr summary <id>` | `GET /repositories/{ws}/{repo}/pullrequests/{id}` + `GET /repositories/{ws}/{repo}/pullrequests/{id}/diff` + `GET /repositories/{ws}/{repo}/pullrequests/{id}/activity` (MERGED only) | Uses `comment_count` from the PR object; `mergedAt` comes from the latest activity `update.state == MERGED`, else `null`. |
 | `bbt pr diff <id>` | `GET /repositories/{ws}/{repo}/pullrequests/{id}/diff` (follow 302) | Human mode prints raw diff; JSON mode parses diff. |
 | `bbt pr comments <id>` | `GET /repositories/{ws}/{repo}/pullrequests/{id}/comments` (paged) | If `<id>` omitted: resolve PR by branch first. |
+| `bbt pr create` | `POST /repositories/{ws}/{repo}/pullrequests` | Source defaults to current branch; title defaults to latest commit subject. |
 | `bbt pr comment <id>` | `POST /repositories/{ws}/{repo}/pullrequests/{id}/comments` | Inline anchor uses `inline.*` fields. |
 | `bbt pr review …` | (optional) `POST …/comments` then `POST`/`DELETE` approve/request-changes | Body is posted as a global comment. |
 | `bbt api …` | Any method/path | Optional `--paginate` merges `values` from `next` pages. |

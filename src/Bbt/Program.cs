@@ -29,6 +29,7 @@ app.Configure(config =>
         pr.AddCommand<PrDiffCommand>("diff").WithDescription("Show pull request diff (raw in human mode, structured in --json; id inferred from current branch if omitted).");
         pr.AddCommand<PrCommentsCommand>("comments").WithDescription("List pull request comments (default: newest-first, one page unless --paginate/--limit requires more; id inferred from current branch if omitted).");
         pr.AddCommand<PrThreadsCommand>("threads").WithDescription("List pull request comment threads (root + replies; ordered by discovery sort (default: -created_on); id inferred from current branch if omitted).");
+        pr.AddCommand<PrCreateCommand>("create").WithDescription("Create a pull request (source: current branch, destination: repo main branch, title: latest commit subject unless overridden).");
         pr.AddCommand<PrCommentCommand>("comment").WithDescription("Post a pull request comment (global/inline/reply; inline default: --side to).");
         pr.AddCommand<PrReviewCommand>("review").WithDescription("Set pull request review status (approve/request changes; --body posts global comment first).");
     });

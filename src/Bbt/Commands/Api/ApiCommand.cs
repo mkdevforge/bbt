@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Bbt.Core.Auth;
+using Bbt.Core.Bitbucket;
 using Bbt.Core.Config;
 using Bbt.Core.Context;
 using Bbt.Core.Git;
@@ -426,14 +427,16 @@ public sealed class ApiCommand : BbtAsyncCommand<ApiCommand.Settings>
         }
 
         const int maxAttempts = 4;
+        var method = HttpMethod.Get;
         for (var attempt = 1; attempt <= maxAttempts; attempt++)
         {
             try
             {
                 using var request = createRequest();
+                method = request.Method;
                 var response = await SendOnceAsync(http, request, settings, authorizationHeader, allowAuthToBitbucketHosts, baseUri, cancellationToken);
 
-                if (!IsTransient(response.StatusCode))
+                if (!BitbucketRetryPolicy.ShouldRetry(response.StatusCode, BitbucketRetryPolicy.IsIdempotent(method)))
                 {
                     return response;
                 }
@@ -451,6 +454,10 @@ public sealed class ApiCommand : BbtAsyncCommand<ApiCommand.Settings>
 
                 response.Dispose();
                 await Task.Delay(delay, cancellationToken);
+            }
+            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException && !cancellationToken.IsCancellationRequested && !BitbucketRetryPolicy.IsIdempotent(method))
+            {
+                throw BitbucketRetryPolicy.CreateOutcomeUnknownException(method, ex);
             }
             catch (HttpRequestException ex) when (attempt < maxAttempts)
             {
@@ -577,14 +584,6 @@ public sealed class ApiCommand : BbtAsyncCommand<ApiCommand.Settings>
         {
             throw new InvalidOperationException($"Refusing to use non-HTTPS {description} '{uri}'. Set {AllowInsecureHttpEnv}=1 to override.");
         }
-    }
-
-    private static bool IsTransient(HttpStatusCode statusCode)
-    {
-        return statusCode is HttpStatusCode.TooManyRequests
-            or HttpStatusCode.BadGateway
-            or HttpStatusCode.ServiceUnavailable
-            or HttpStatusCode.GatewayTimeout;
     }
 
     private static TimeSpan GetRetryDelay(HttpResponseMessage response, int attempt)

@@ -19,19 +19,25 @@ public abstract class BbtAsyncCommand<TSettings> : AsyncCommand<TSettings>
             var authHint = ex.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden
                 ? $"\nHint: verify credentials and token scopes: {BitbucketTokenScopes.MinimumCsv}"
                 : string.Empty;
-            Console.Error.WriteLine($"{(int)ex.StatusCode} {ex.StatusCode}: {ex.ApiMessage ?? ex.Message}{detail}{authHint}");
+            WriteError($"{(int)ex.StatusCode} {ex.StatusCode}: {ex.ApiMessage ?? ex.Message}{detail}{authHint}");
             return 1;
         }
         catch (InvalidOperationException ex)
         {
-            Console.Error.WriteLine(ex.Message);
+            WriteError(ex.Message);
             return 2;
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine(ex.Message);
+            WriteError(ex.Message);
             return 1;
         }
+    }
+
+    // Error text can echo user input or API responses; strip control characters so it cannot drive the terminal.
+    private static void WriteError(string message)
+    {
+        Console.Error.WriteLine(TerminalSanitizer.Sanitize(message));
     }
 
     protected abstract Task<int> ExecuteCommandAsync(CommandContext context, TSettings settings);

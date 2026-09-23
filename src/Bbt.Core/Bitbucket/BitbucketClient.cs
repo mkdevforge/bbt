@@ -83,6 +83,23 @@ public sealed class BitbucketClient : IDisposable
             cancellationToken);
     }
 
+    public async Task<BitbucketPullRequest> CreatePullRequestAsync(
+        string workspace,
+        string repo,
+        CreatePullRequestRequest body,
+        CancellationToken cancellationToken = default)
+    {
+        var url = $"repositories/{Uri.EscapeDataString(workspace)}/{Uri.EscapeDataString(repo)}/pullrequests";
+        var json = JsonSerializer.Serialize(body);
+
+        return await SendJsonAsync<BitbucketPullRequest>(
+            () => new HttpRequestMessage(HttpMethod.Post, url)
+            {
+                Content = new StringContent(json, Encoding.UTF8, "application/json"),
+            },
+            cancellationToken);
+    }
+
     public async Task<BitbucketPaginated<BitbucketPullRequestActivity>> ListPullRequestActivityAsync(
         string workspace,
         string repo,
@@ -305,14 +322,16 @@ public sealed class BitbucketClient : IDisposable
         }
 
         const int maxAttempts = 4;
+        var method = HttpMethod.Get;
         for (var attempt = 1; attempt <= maxAttempts; attempt++)
         {
             try
             {
                 using var request = createRequest();
+                method = request.Method;
                 var response = await SendOnceAsync(request, allowRedirect, cancellationToken);
 
-                if (!IsTransient(response.StatusCode))
+                if (!BitbucketRetryPolicy.ShouldRetry(response.StatusCode, BitbucketRetryPolicy.IsIdempotent(method)))
                 {
                     return response;
                 }
@@ -327,6 +346,10 @@ public sealed class BitbucketClient : IDisposable
                 response.Dispose();
                 await Task.Delay(delay, cancellationToken);
                 continue;
+            }
+            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException && !cancellationToken.IsCancellationRequested && !BitbucketRetryPolicy.IsIdempotent(method))
+            {
+                throw BitbucketRetryPolicy.CreateOutcomeUnknownException(method, ex);
             }
             catch (HttpRequestException ex) when (attempt < maxAttempts)
             {
@@ -434,14 +457,6 @@ public sealed class BitbucketClient : IDisposable
         {
             throw new InvalidOperationException($"Refusing to use non-HTTPS {description} '{uri}'. Set {AllowInsecureHttpEnv}=1 to override.");
         }
-    }
-
-    private static bool IsTransient(HttpStatusCode statusCode)
-    {
-        return statusCode is HttpStatusCode.TooManyRequests
-            or HttpStatusCode.BadGateway
-            or HttpStatusCode.ServiceUnavailable
-            or HttpStatusCode.GatewayTimeout;
     }
 
     private static TimeSpan GetRetryDelay(HttpResponseMessage response, int attempt)

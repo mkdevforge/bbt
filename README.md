@@ -98,6 +98,7 @@ If `--email`/`--token` are omitted, `auth login` prompts interactively (unless s
 - `bbt pr diff [<id>] [--include-raw]`
 - `bbt pr comments [<id>] [--limit <n>] [--sort <expr>] [--page <n>] [--pagelen <n>] [--paginate] [--contains <text> | -q/--query <expr>]`
 - `bbt pr threads [<id>] [--limit <n>] [--sort <expr>] [--pagelen <n>] [--contains <text> | -q/--query <expr>]`
+- `bbt pr create [-t/--title <text>] [--body <text>|--body-file <path>] [-s/--source <branch>] [-d/--destination <branch>] [-r/--reviewer <id>]... [--close-source-branch] [--draft]`
 - `bbt pr comment <id> (--body <text> | --body-file <path>) [--reply-to <comment-id>] [--file <path> --line <n> [--line-end <n>] [--side <to|from>]]`
 - `bbt pr review <id> (--approve|--unapprove|--request-changes|--unrequest-changes) [--body <text>|--body-file <path>]`
 
@@ -111,7 +112,9 @@ Notes:
 - `pr summary --json` emits one normalized metrics-friendly object. `mergedAt` comes from the PR activity log's `MERGED` state transition when Bitbucket exposes it; otherwise it is `null` instead of falling back to `updated_on`.
 - `pr comments` defaults to newest-first (`--sort -created_on`) and returns one page by default (50 comments). Use `--paginate`, a larger `--pagelen`, or `--limit` to fetch more.
 - `pr threads` groups comments into discussion threads (root + replies, including nested replies). Threads are ordered by discovery sort (default: `--sort -created_on`); with `--contains/-q`, ordering is based on the newest matching comment. Defaults: `--limit 20`, `--pagelen 100`.
+- `pr create` defaults `--source` to the current git branch, `--destination` to the repository main branch, and `--title` to the subject of the latest commit on the source branch (the pushed `origin/<source>` tip when available; only when the checkout's origin is the target repository). The source branch must already be pushed. `--reviewer` accepts a UUID (`{...}`) or an Atlassian account id and can be repeated.
 - `pr review --body/--body-file` posts a global comment first, then performs the review action.
+- Write requests (POST) are retried only on `429`. After a gateway error or a lost connection they are not resent, because Bitbucket may already have applied them; check the current state before you run the command again.
 
 #### PR comment threads (recommended)
 
