@@ -3,6 +3,7 @@ using Bbt.Commands.Api;
 using Bbt.Commands.Auth;
 using Bbt.Commands.Llms;
 using Bbt.Commands.Pr;
+using Bbt.Core.Util;
 using Bbt.Infrastructure;
 
 var app = new CommandApp();
@@ -38,4 +39,4 @@ app.Configure(config =>
     config.AddCommand<LlmsCommand>("llms").WithDescription("Print full CLI capabilities in one output for LLM/tool context.");
 });
 
-return await app.RunAsync(args);
+return await app.RunAsync(CommandLineArguments.TrimLeadingWhitespace(args));
