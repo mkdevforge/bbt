@@ -61,6 +61,11 @@ public sealed class PrCreateCommand : BbtAsyncCommand<PrCreateCommand.Settings>
                 return Spectre.Cli.ValidationResult.Error("Specify at most one of --body or --body-file.");
             }
 
+            if (BodyFile is not null && string.IsNullOrWhiteSpace(BodyFile))
+            {
+                return Spectre.Cli.ValidationResult.Error("--body-file cannot be empty.");
+            }
+
             if (Title is not null && string.IsNullOrWhiteSpace(Title))
             {
                 return Spectre.Cli.ValidationResult.Error("--title cannot be empty.");
